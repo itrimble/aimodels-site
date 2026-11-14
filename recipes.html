@@ -1,0 +1,132 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recipes · Remnant AI Models</title><meta name="description" content="Remnant Security's local AI model archive: what we keep, what runs on which machine, and how to run it.">
+<link rel="stylesheet" href="style.css"></head><body><header><div class="nav"><a class="brand" href="index.html">Remnant <span>AI Models</span></a><a class="l" href="index.html">Overview</a><a class="l" href="catalog.html">Catalog</a><a class="l" href="fleet.html">Fleet & fit</a><a class="l on" href="recipes.html">Recipes</a><a class="l" href="use-cases.html">Use cases</a><a class="l" href="licenses.html">Licenses</a></div></header>
+<main><h1>Recipes</h1><p class="lead">Copy-paste starting points. Paths are placeholders (<code>/models/...</code>); swap in your own. Check each tool's <code>--help</code> on your build, because flags change between releases.</p>
+<h2 id="m5setup">Bosgame M5: Linux memory setup</h2>
+<p>On Linux, keep the BIOS dedicated VRAM small (for example 512 MB) and let the GPU borrow system memory through GTT. A commonly used kernel setting for Strix Halo raises the TTM page limit (4 KiB pages; 27,648,000 pages ≈ 105 GiB):</p>
+<pre><code># /etc/default/grub  (then: sudo update-grub && reboot)
+GRUB_CMDLINE_LINUX_DEFAULT="quiet ttm.pages_limit=27648000 ttm.page_pool_size=27648000"
+
+# confirm after reboot
+cat /sys/module/ttm/parameters/pages_limit</code></pre>
+<p class="note">Reported practical ceiling is about 108 GB; going to ~110 GB caused errors for at least one reviewer. On Windows the GPU share is capped at 96 GB (AMD Variable Graphics Memory).</p>
+<h2 id="llamacpp">llama.cpp on the M5 (Vulkan or ROCm)</h2>
+<pre><code>git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
+# Vulkan (simplest on Strix Halo)
+cmake -B build -DGGML_VULKAN=ON -DGGML_RPC=ON -DCMAKE_BUILD_TYPE=Release
+# or ROCm/HIP (Radeon 8060S is gfx1151)
+# cmake -B build -DGGML_HIP=ON -DAMDGPU_TARGETS=gfx1151 -DGGML_RPC=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release -j</code></pre>
+<h3>One box: Qwen3.8 Flash-Next IQ4_XS as an OpenAI-compatible server</h3>
+<pre><code>./build/bin/llama-server \
+  -m /models/unsloth-Qwen3.8-Flash-Next-UD-IQ4_XS/UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00001-of-00004.gguf \
+  --mmproj /models/unsloth-Qwen3.8-Flash-Next-UD-IQ4_XS/mmproj-BF16.gguf \
+  -ngl 99 -c 32768 --jinja \
+  --host 127.0.0.1 --port 8080
+# point any OpenAI client at http://127.0.0.1:8080/v1</code></pre>
+<p>Split GGUFs load from the first shard; llama.cpp finds the rest. Same pattern for GLM-5.3-Flash UD-IQ2_XXS (leave context modest: it is the tightest one-box fit).</p>
+<h3 id="rpc">Two boxes: llama.cpp RPC</h3>
+<pre><code># on box B (worker): expose its GPU over the link (USB4 or 10GbE)
+./build/bin/rpc-server -H 0.0.0.0 -p 50052
+
+# on box A (main): load the model across both
+./build/bin/llama-server \
+  -m /models/ISTA-DASLab-DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ1_M/DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ1_M-00001-of-00006.gguf \
+  --mmproj /models/ISTA-DASLab-DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ1_M/mmproj-DeepSeek-V4.1-Flash-1017-BF16.gguf \
+  --rpc 10.10.10.2:50052 -ngl 99 -c 16384 --jinja --host 127.0.0.1 --port 8080</code></pre>
+<p class="note danger">rpc-server has no authentication. Only run it on a direct cable or an isolated network segment, never on a LAN you share or the internet.</p>
+<p>For the ISTA DeepSeek build, the shared Engram file must be linked as shard 6 before loading (from the ISTA card): <code>ln -s DeepSeek-V4.1-Flash-Engram-IQ4_NL.gguf DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ1_M-00006-of-00006.gguf</code>. Files fetched before Oct 27 2026 need the card's <code>convert_ds41_upstream.py</code>. Keep the Engram file on fast NVMe; it is paged, not held in memory.</p>
+<h3>Smaller machines: MoE expert offload</h3>
+<pre><code># keep attention on the GPU, push MoE expert tensors to system RAM
+./build/bin/llama-server -m model-00001-of-0000N.gguf -ngl 99 \
+  -ot ".ffn_.*_exps.=CPU" -c 16384 --host 127.0.0.1 --port 8080</code></pre>
+<p>This is what makes Flash-Next or GLM usable on omarchy after its 128 GB RAM upgrade (8 GB RX 6600 XT + system RAM). Expect it to be slow: expert reads come over DDR4.</p>
+<h2 id="mac">MacBook Pro / Mac mini</h2>
+<pre><code>brew install llama.cpp
+# optional: let the GPU wire more unified memory (resets on reboot; leave headroom for macOS)
+sudo sysctl iogpu.wired_limit_mb=30720
+llama-server -m /models/huihui-ai-Qwen3.8-27B-Q4_K/Huihui-Qwen3.8-27B-abliterated-Q4_K.gguf \
+  --mmproj /models/huihui-ai-Qwen3.8-27B-Q4_K/mmproj-model-bf16.gguf -ngl 99 -c 32768 --jinja --port 8080</code></pre>
+<h2 id="ollama">Ollama and LM Studio</h2>
+<pre><code># Ollama: wrap a single-file GGUF
+cat > Modelfile &lt;&lt;'EOF'
+FROM /models/unsloth-Qwen3.8-27B-UD-Q8_K_XL/Qwen3.8-27B-UD-Q8_K_XL.gguf
+PARAMETER num_ctx 32768
+EOF
+ollama create qwen38-27b-q8 -f Modelfile
+ollama run qwen38-27b-q8
+
+# split GGUFs: merge first if your Ollama version won't import shards
+llama-gguf-split --merge first-00001-of-00004.gguf merged.gguf
+
+# LM Studio CLI
+lms import /models/unsloth-Qwen3.8-27B-UD-Q8_K_XL/Qwen3.8-27B-UD-Q8_K_XL.gguf
+lms server start</code></pre>
+<p class="small mut">New architectures (Qwen3.8 Flash-Next, GLM-5.3, DeepSeek V4.1) need a recent llama.cpp; Ollama and LM Studio pick up support later. Mirai, Maya and Strata builds won't load in either.</p>
+<h2 id="forks">Builds that need their own engine</h2><ul>
+<li><b>Qwen3.8-27B Mirai S</b> (alesha-pro): use <a href="https://github.com/professorpalmer/mirai-s-ada">mirai-s-ada</a> (recommended on the card) or the <a href="https://github.com/alesha-pro/llama.cpp-mirai-s">llama.cpp-mirai-s</a> fork.</li>
+<li><b>GLM-5.3-Flash Maya-M</b> (alesha-pro): Project Maya engine plus alesha-pro's <a href="https://github.com/alesha-pro/project-maya/blob/glm-ablate/docs/GLM-ABLATE.md">GLM ablate patch</a>.</li>
+<li><b>Flash-Next GSQ-RCO Strata</b> (alesha-pro): Strata engine; the card's setup script writes the engine flags.</li></ul>
+<h2 id="convert">Original safetensors: serve or quantize</h2>
+<pre><code># quantize your own GGUF from the BF16 archive copy (example: Qwen3.8-27B)
+python llama.cpp/convert_hf_to_gguf.py /models/Qwen-Qwen3.8-27B --outtype bf16 --outfile qwen38-27b-bf16.gguf
+./build/bin/llama-quantize qwen38-27b-bf16.gguf qwen38-27b-Q5_K_M.gguf Q5_K_M</code></pre>
+<p>The Flash-Next, GLM and DeepSeek originals are 300-500 GB; they're kept as the source of truth, not for running on this fleet.</p>
+<h2 id="comfyui">ComfyUI (image, video, YuE2)</h2>
+<pre><code>git clone https://github.com/comfyanonymous/ComfyUI && cd ComfyUI
+python -m venv .venv && . .venv/bin/activate
+# AMD on Linux: install the ROCm build of PyTorch first (see pytorch.org), then:
+pip install -r requirements.txt
+python main.py --listen 127.0.0.1 --port 8188</code></pre>
+<p>YuE2 (ComfyUI repack): put <code>sheetsage2_bf16.safetensors</code> in <code>models/audio_encoders/</code> and <code>yue2_3b_bf16.safetensors</code> in <code>models/checkpoints/</code>, then load the official "YuE2: Text to Music" workflow template. MOSS-Image: install the MOSS-Image node from ComfyUI Manager. Wan 2.2 and HunyuanVideo 1.5 have ComfyUI integrations listed on their cards.</p>
+<h2 id="image">Image with Diffusers</h2>
+<pre><code>pip install "torch>=2.4.0" "transformers>=5.17" git+https://github.com/huggingface/diffusers accelerate pillow</code></pre>
+<pre><code>import torch
+from diffusers import QwenImage21Pipeline
+pipe = QwenImage21Pipeline.from_pretrained("/models/Qwen-Qwen-Image-2.1", torch_dtype=torch.bfloat16)
+pipe.enable_model_cpu_offload()   # memory optimisation from the model card
+img = pipe(prompt="isometric illustration of a home lab rack, clean flat style").images[0]
+img.save("out.png")</code></pre>
+<p class="note danger">Qwen-Image 2.1 is under the Qwen Research License: non-commercial use only.</p>
+<h2 id="video">Video: Wan 2.2 A14B and HunyuanVideo 1.5</h2>
+<pre><code>git clone https://github.com/Wan-Video/Wan2.2.git && cd Wan2.2
+pip install -r requirements.txt
+# single-device command from the model card, with offload
+python generate.py --task t2v-A14B --size 1280*720 --ckpt_dir /models/Wan-AI-Wan2.2-T2V-A14B \
+  --offload_model True --convert_model_dtype --prompt "slow dolly shot across a dark server room, red status LEDs"</code></pre>
+<p>Image-to-video uses <code>--task i2v-A14B</code> with the I2V checkpoint and an input image (see the card). HunyuanVideo 1.5: clone <a href="https://github.com/Tencent-Hunyuan/HunyuanVideo-1.5">Tencent-Hunyuan/HunyuanVideo-1.5</a>, <code>pip install -r requirements.txt</code>, and follow its README or ComfyUI guide. Its license excludes the EU, UK and South Korea.</p>
+<h2 id="voice">Speech: Whisper, Qwen3-TTS, Fish S2 Pro</h2>
+<pre><code># Whisper large-v3-turbo via Transformers (card's route)
+pip install --upgrade transformers "datasets[audio]" accelerate
+python - &lt;&lt;'EOF'
+import torch
+from transformers import pipeline
+asr = pipeline("automatic-speech-recognition", model="/models/openai-whisper-large-v3-turbo",
+               torch_dtype=torch.float16, device_map="auto")
+print(asr("meeting.wav", return_timestamps=True)["text"])
+EOF
+
+# or whisper.cpp (Metal on Mac, Vulkan on the M5), using its own ggml file
+git clone https://github.com/ggml-org/whisper.cpp && cd whisper.cpp
+sh ./models/download-ggml-model.sh large-v3-turbo
+cmake -B build && cmake --build build -j --config Release
+./build/bin/whisper-cli -m models/ggml-large-v3-turbo.bin -f meeting.wav</code></pre>
+<pre><code># Qwen3-TTS voice clone (Base model needs a short reference clip + its transcript)
+pip install -U qwen-tts
+python - &lt;&lt;'EOF'
+import torch, soundfile as sf
+from qwen_tts import Qwen3TTSModel
+model = Qwen3TTSModel.from_pretrained("/models/Qwen-Qwen3-TTS-12Hz-1.7B-Base",
+                                      device_map="cuda:0", dtype=torch.bfloat16)
+wavs, sr = model.generate_voice_clone(text="Your weekly security digest is ready.",
+    language="English", ref_audio="my_voice.wav", ref_text="Transcript of my_voice.wav")
+sf.write("out.wav", wavs[0], sr)
+EOF</code></pre>
+<p class="small mut">On Apple silicon use <code>device_map="mps"</code>; on the M5 with ROCm PyTorch, AMD GPUs still appear as <code>cuda</code>. Only clone voices you have permission to use. Fish Audio S2 Pro runs with <a href="https://github.com/fishaudio/fish-speech">fish-speech</a>; it is research/non-commercial unless you buy a license.</p>
+<h2 id="music">Music: ACE-Step 1.5 and YuE2</h2>
+<p>ACE-Step 1.5 runs from <a href="https://github.com/ace-step/ACE-Step-1.5">ace-step/ACE-Step-1.5</a>; its card says it runs locally in under 4 GB of VRAM, so even the Mac mini can host it. YuE2 runs inside ComfyUI (above) and is CC BY-NC 4.0, so no commercial use.</p>
+<h2 id="openwebui">Front end: Open WebUI on any llama-server</h2>
+<pre><code>docker run -d --name open-webui -p 127.0.0.1:3000:8080 \
+  -e OPENAI_API_BASE_URL=http://host.docker.internal:8080/v1 -e OPENAI_API_KEY=none \
+  --add-host=host.docker.internal:host-gateway \
+  -v open-webui:/app/backend/data ghcr.io/open-webui/open-webui:main</code></pre></main><footer>Remnant Security · Local model archive notes. Facts come from each model's Hugging Face card; speed and memory figures are estimates and are labelled as such. Nothing here is a benchmark.</footer></body></html>

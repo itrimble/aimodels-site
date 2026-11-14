@@ -1,0 +1,1790 @@
+{
+ "generated": "2026-11-14 (America/Chicago)",
+ "method": {
+  "memory": "Estimated memory = resident weight bytes x 1.05 + 4 GB (runtime + about 32K tokens of KV cache) for LLMs; media = files + 4 GB, an upper bound since ComfyUI/Diffusers offload components. Estimates, not measurements.",
+  "tok_s": "Token/s = memory bandwidth / (active params x bits-per-weight / 8). Bits-per-weight = GGUF bytes x 8 / GGUF parameter count. This is a theoretical ceiling for generation; real numbers are usually well below it. Two-box figures take off 18% for RPC only when the model does not fit one box (otherwise run it on one box). Not given where active params are unknown or the model needs conversion.",
+  "verdicts": "fits = fits in the GPU-usable budget; offload = needs raised limits or CPU/RAM offload; convert = original safetensors, quantize first; after-RAM-upgrade = MoE expert offload once omarchy has 128 GB; unknown = machine specs unknown."
+ },
+ "fleet": [
+  {
+   "id": "m5x1",
+   "name": "Bosgame M5 (x1)",
+   "status": "planned",
+   "cpu": "AMD Ryzen AI Max+ 395 (16C/32T)",
+   "gpu": "Radeon 8060S iGPU (40 CU, RDNA 3.5)",
+   "ram": "128 GB LPDDR5X unified",
+   "bw_gbs": 215,
+   "bw_note": "256 GB/s on paper, ~210-220 measured",
+   "budget_gb": 108,
+   "offload_gb": 118,
+   "budget_note": "~108-110 GB GPU-usable on Linux with GTT raised (96 GB cap on Windows). Fit budget used here: 108 GB.",
+   "src": "MANIFEST hardware notes; AI Budget Build more-hardware.json"
+  },
+  {
+   "id": "m5x2",
+   "name": "Bosgame M5 (x2, RPC)",
+   "status": "planned",
+   "cpu": "2x Ryzen AI Max+ 395",
+   "gpu": "2x Radeon 8060S over llama.cpp RPC (USB4 or 10GbE)",
+   "ram": "2x128 GB",
+   "bw_gbs": 215,
+   "bw_note": "Per box; linking adds capacity, not speed (community: ~14-22% token-gen cost)",
+   "budget_gb": 210,
+   "offload_gb": 225,
+   "budget_note": "~200-225 GB usable across two nodes. Fit budget used here: 210 GB; 210-225 GB = tight.",
+   "src": "MANIFEST hardware notes (aifinitee, WillItRunAI)"
+  },
+  {
+   "id": "mbp",
+   "name": "MacBook Pro (M4 Max)",
+   "status": "owned",
+   "cpu": "Apple M4 Max, 14 cores (10P+4E)",
+   "gpu": "32-core GPU, Metal 4",
+   "ram": "36 GB unified",
+   "bw_gbs": 410,
+   "bw_note": "Apple spec for 14-core M4 Max",
+   "budget_gb": 27,
+   "offload_gb": 32,
+   "budget_note": "macOS caps GPU wired memory by default (~75% = ~27 GB). Raising iogpu.wired_limit_mb to ~32 GB is possible but leaves little for the OS.",
+   "src": "system_profiler on the machine (Nov 14 2026)"
+  },
+  {
+   "id": "mini",
+   "name": "Mac mini (M4)",
+   "status": "owned",
+   "cpu": "Apple M4",
+   "gpu": "Apple M4 GPU (core count unknown)",
+   "ram": "16 GB unified",
+   "bw_gbs": 120,
+   "bw_note": "Apple spec for M4",
+   "budget_gb": 10.5,
+   "offload_gb": 12,
+   "budget_note": "~2/3 of 16 GB usable by the GPU by default. Already busy as build box + Hermes/Ollama.",
+   "src": "sysctl on the machine (Nov 14 2026)"
+  },
+  {
+   "id": "omarchy",
+   "name": "omarchy (AMD desktop)",
+   "status": "owned",
+   "cpu": "AMD Ryzen 9 5950X",
+   "gpu": "Radeon RX 6600 XT 8 GB (RDNA2, gfx1032)",
+   "ram": "Current RAM unknown (128 GB DDR4 upgrade planned)",
+   "bw_gbs": 256,
+   "bw_note": "GPU VRAM 256 GB/s; dual-channel DDR4 system RAM is far slower (~50 GB/s class, estimate)",
+   "budget_gb": 7,
+   "offload_gb": null,
+   "budget_note": "7 GB of the 8 GB VRAM for weights. Offload capacity depends on system RAM, which is unknown today; after the 128 GB upgrade ~110 GB of MoE experts could sit in RAM.",
+   "src": "AI Budget Build my-pcs.json + gpus.json"
+  },
+  {
+   "id": "nas",
+   "name": "Ugreen DXP2800 NAS",
+   "status": "owned",
+   "cpu": "Intel N100 (4 cores)",
+   "gpu": "Intel UHD (iGPU)",
+   "ram": "8 GB",
+   "bw_gbs": null,
+   "bw_note": "Single-channel DDR5; not a model runner",
+   "budget_gb": 3,
+   "offload_gb": null,
+   "budget_note": "Storage host. Already runs ollama/open-webui containers; only tiny models (e.g. Whisper on CPU) are realistic.",
+   "src": "/proc/cpuinfo + free on the NAS"
+  },
+  {
+   "id": "neo",
+   "name": "MacBook Neo",
+   "status": "owned",
+   "cpu": "unknown",
+   "gpu": "unknown",
+   "ram": "unknown",
+   "bw_gbs": null,
+   "bw_note": "unknown",
+   "budget_gb": null,
+   "offload_gb": null,
+   "budget_note": "Specs unknown: machine was offline/unreachable on Nov 14 2026.",
+   "src": "unreachable"
+  }
+ ],
+ "models": [
+  {
+   "repo": "Qwen/Qwen3.8-27B",
+   "hf_url": "https://huggingface.co/Qwen/Qwen3.8-27B",
+   "publisher": "Qwen",
+   "family": "Qwen3.8-27B",
+   "modality": "text+vision LLM",
+   "kind": "official",
+   "params_total_b": 27.0,
+   "params_active_b": 27.0,
+   "moe": false,
+   "params_note": "27B dense (model card). Hybrid attention: 48 linear + 16 full layers (config.json). Native context 262,144.",
+   "params_source": "https://huggingface.co/Qwen/Qwen3.8-27B",
+   "quant_format": "BF16 safetensors",
+   "size_bytes": 55586107015,
+   "size_gib": 51.77,
+   "resident_bytes": 55586107015,
+   "license": "apache-2.0",
+   "abliterated": false,
+   "public_folder": "official",
+   "status": "done",
+   "engine": "Transformers / vLLM / SGLang; convert for llama.cpp",
+   "notes": "Original weights. Archive copy.",
+   "context_native": 262144,
+   "license_note": "Apache 2.0: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 62.4,
+   "id": "qwen3-8-27b-bf16"
+  },
+  {
+   "repo": "Qwen/Qwen3.8-Flash-Next",
+   "hf_url": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next",
+   "publisher": "Qwen",
+   "family": "Qwen3.8 Flash-Next",
+   "modality": "text+vision LLM",
+   "kind": "official",
+   "params_total_b": 125.0,
+   "params_active_b": 6.0,
+   "moe": true,
+   "params_note": "125B MoE with 6B activated, plus 51B n-gram embedding and 4B MTP (model card). 512 experts, 10 routed + 1 shared active. Native context 262,144.",
+   "params_source": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next",
+   "quant_format": "BF16 safetensors",
+   "size_bytes": 360023343554,
+   "size_gib": 335.3,
+   "resident_bytes": 360023343554,
+   "license": "qwen-community-1.0",
+   "abliterated": false,
+   "public_folder": "official",
+   "status": "done",
+   "engine": "Transformers / vLLM / SGLang",
+   "notes": "Original weights. Archive copy.",
+   "context_native": 262144,
+   "license_note": "Qwen Community License 1.0: commercial OK; MaaS/AI-assistant businesses need a separate license; attribution above 100M MAU or $20M/month.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 382.0,
+   "id": "qwen3-8-flash-next-bf16"
+  },
+  {
+   "repo": "zai-org/GLM-5.3-Flash",
+   "hf_url": "https://huggingface.co/zai-org/GLM-5.3-Flash",
+   "publisher": "zai-org",
+   "family": "GLM-5.3-Flash",
+   "modality": "text+vision LLM",
+   "kind": "official",
+   "params_total_b": 320.0,
+   "params_active_b": 18.0,
+   "moe": true,
+   "params_note": "320B total, 18B active (model card). 288 routed experts, 8 per token; 34 linear + 11 sparse-attention layers (config.json).",
+   "params_source": "https://huggingface.co/zai-org/GLM-5.3-Flash",
+   "quant_format": "safetensors (as published)",
+   "size_bytes": 328366173639,
+   "size_gib": 305.81,
+   "resident_bytes": 328366173639,
+   "license": "mit",
+   "abliterated": false,
+   "public_folder": "official",
+   "status": "done",
+   "engine": "Transformers / vLLM / SGLang",
+   "notes": "Original weights. Archive copy.",
+   "context_native": 1048576,
+   "license_note": "MIT: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 348.8,
+   "id": "glm-5-3-flash-safetensors"
+  },
+  {
+   "repo": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+   "hf_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+   "publisher": "deepseek-ai",
+   "family": "DeepSeek V4.1 Flash 1017",
+   "modality": "text+vision LLM",
+   "kind": "official",
+   "params_total_b": 763.2,
+   "params_active_b": null,
+   "moe": true,
+   "params_note": "763.2B per HF safetensors count, including 196.6B of Engram lookup tables (ISTA-DASLab card). 384 routed experts, 6 per token (config.json). Active parameter count is not stated on the official card: unknown.",
+   "params_source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+   "quant_format": "FP8/FP4 safetensors (ISTA card calls base FP8/FP4)",
+   "size_bytes": 510311062017,
+   "size_gib": 475.26,
+   "resident_bytes": 510311062017,
+   "license": "mit",
+   "abliterated": false,
+   "public_folder": "official",
+   "status": "done",
+   "engine": "vLLM / SGLang",
+   "notes": "Original weights. Archive copy.",
+   "context_native": 1048576,
+   "license_note": "MIT: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "convert",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 539.8,
+   "id": "deepseek-v4-1-flash-1017-fp8-fp4"
+  },
+  {
+   "repo": "unsloth/Qwen3.8-27B-GGUF",
+   "hf_url": "https://huggingface.co/unsloth/Qwen3.8-27B-GGUF",
+   "publisher": "unsloth",
+   "family": "Qwen3.8-27B",
+   "modality": "text+vision LLM",
+   "kind": "gguf",
+   "params_total_b": 27.0,
+   "params_active_b": 27.0,
+   "moe": false,
+   "params_note": "27B dense (model card). Hybrid attention: 48 linear + 16 full layers (config.json). Native context 262,144.",
+   "params_source": "https://huggingface.co/Qwen/Qwen3.8-27B",
+   "quant_format": "UD-Q8_K_XL GGUF + mmproj",
+   "size_bytes": 32389149295,
+   "size_gib": 30.16,
+   "resident_bytes": 32389149295,
+   "license": "apache-2.0",
+   "abliterated": false,
+   "public_folder": "official",
+   "status": "done",
+   "engine": "llama.cpp / LM Studio / Ollama",
+   "notes": "Near-lossless 8-bit.",
+   "context_native": 262144,
+   "license_note": "Apache 2.0: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": 27.32,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": 6.7
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": 6.7
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 38.0,
+   "id": "qwen3-8-27b-gguf-ud-q8-k-xl"
+  },
+  {
+   "repo": "unsloth/Qwen3.8-Flash-Next-GGUF",
+   "hf_url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF",
+   "publisher": "unsloth",
+   "family": "Qwen3.8 Flash-Next",
+   "modality": "text+vision LLM",
+   "kind": "gguf",
+   "params_total_b": 125.0,
+   "params_active_b": 6.0,
+   "moe": true,
+   "params_note": "125B MoE with 6B activated, plus 51B n-gram embedding and 4B MTP (model card). 512 experts, 10 routed + 1 shared active. Native context 262,144.",
+   "params_source": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next",
+   "quant_format": "UD-IQ4_XS GGUF (4 shards) + mmproj",
+   "size_bytes": 94579972258,
+   "size_gib": 88.08,
+   "resident_bytes": 94579972258,
+   "license": "qwen-community-1.0",
+   "abliterated": false,
+   "public_folder": "official",
+   "status": "in-progress",
+   "engine": "llama.cpp / LM Studio",
+   "notes": "One-box pick for Flash-Next.",
+   "context_native": 262144,
+   "license_note": "Qwen Community License 1.0: commercial OK; MaaS/AI-assistant businesses need a separate license; attribution above 100M MAU or $20M/month.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": 176.94,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": 67.0
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": 67.0
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 103.3,
+   "id": "qwen3-8-flash-next-gguf-ud-iq4-xs"
+  },
+  {
+   "repo": "unsloth/GLM-5.3-Flash-GGUF",
+   "hf_url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF",
+   "publisher": "unsloth",
+   "family": "GLM-5.3-Flash",
+   "modality": "text+vision LLM",
+   "kind": "gguf",
+   "params_total_b": 320.0,
+   "params_active_b": 18.0,
+   "moe": true,
+   "params_note": "320B total, 18B active (model card). 288 routed experts, 8 per token; 34 linear + 11 sparse-attention layers (config.json).",
+   "params_source": "https://huggingface.co/zai-org/GLM-5.3-Flash",
+   "quant_format": "UD-IQ2_XXS GGUF + mmproj",
+   "size_bytes": 103008979940,
+   "size_gib": 95.93,
+   "resident_bytes": 103008979940,
+   "license": "mit",
+   "abliterated": false,
+   "public_folder": "official",
+   "status": "queued",
+   "engine": "llama.cpp",
+   "notes": "Tight one-box pick (2-bit).",
+   "context_native": 1048576,
+   "license_note": "MIT: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": 320.76,
+   "fit": {
+    "m5x1": {
+     "verdict": "offload",
+     "est_tok_s": 37.2
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": 30.5
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 112.2,
+   "id": "glm-5-3-flash-gguf-ud-iq2-xxs"
+  },
+  {
+   "repo": "ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF",
+   "hf_url": "https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF",
+   "publisher": "ISTA-DASLab",
+   "family": "DeepSeek V4.1 Flash 1017",
+   "modality": "text+vision LLM",
+   "kind": "gguf",
+   "params_total_b": 763.2,
+   "params_active_b": null,
+   "moe": true,
+   "params_note": "763.2B per HF safetensors count, including 196.6B of Engram lookup tables (ISTA-DASLab card). 384 routed experts, 6 per token (config.json). Active parameter count is not stated on the official card: unknown.",
+   "params_source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+   "quant_format": "GSQ-RCO IQ1_M backbone + shared Engram IQ4_NL + mmproj",
+   "size_bytes": 232288767636,
+   "size_gib": 216.34,
+   "resident_bytes": 120720000000.0,
+   "license": "mit",
+   "abliterated": false,
+   "public_folder": "official",
+   "status": "queued",
+   "engine": "llama.cpp (build from Oct 27 2026 or later)",
+   "notes": "Backbone 120.72 GB must be resident; the 110.60 GB Engram file can stay memory-mapped on SSD (ISTA card). Engram must be linked as shard 6.",
+   "context_native": 1048576,
+   "license_note": "MIT: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 130.8,
+   "id": "deepseek-v4-1-flash-1017-gsq-rco-gguf-gsq-rco"
+  },
+  {
+   "repo": "alesha-pro/Qwen3.8-27B-S-mirai-GGUF",
+   "hf_url": "https://huggingface.co/alesha-pro/Qwen3.8-27B-S-mirai-GGUF",
+   "publisher": "alesha-pro",
+   "family": "Qwen3.8-27B",
+   "modality": "text+vision LLM",
+   "kind": "abliterated",
+   "params_total_b": 27.0,
+   "params_active_b": 27.0,
+   "moe": false,
+   "params_note": "27B dense (model card). Hybrid attention: 48 linear + 16 full layers (config.json). Native context 262,144.",
+   "params_source": "https://huggingface.co/Qwen/Qwen3.8-27B",
+   "quant_format": "Mirai S 2.4-bit GGUF + mmproj + refusal control vector",
+   "size_bytes": 12102272287,
+   "size_gib": 11.27,
+   "resident_bytes": 12102272287,
+   "license": "apache-2.0",
+   "abliterated": true,
+   "public_folder": "abliterated",
+   "status": "done",
+   "engine": "mirai-s-ada or llama.cpp-mirai-s fork ONLY",
+   "notes": "Card: mainline llama.cpp, LM Studio and Ollama will not load this file. Abliteration is applied via a refusal-direction control vector.",
+   "context_native": 262144,
+   "license_note": "Apache 2.0: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 16.7,
+   "id": "qwen3-8-27b-s-mirai-gguf-mirai"
+  },
+  {
+   "repo": "alesha-pro/Qwen3.8-Flash-Next-abliterated-GSQ-RCO-Strata-GGUF",
+   "hf_url": "https://huggingface.co/alesha-pro/Qwen3.8-Flash-Next-abliterated-GSQ-RCO-Strata-GGUF",
+   "publisher": "alesha-pro",
+   "family": "Qwen3.8 Flash-Next",
+   "modality": "text+vision LLM",
+   "kind": "abliterated",
+   "params_total_b": 125.0,
+   "params_active_b": 6.0,
+   "moe": true,
+   "params_note": "125B MoE with 6B activated, plus 51B n-gram embedding and 4B MTP (model card). 512 experts, 10 routed + 1 shared active. Native context 262,144.",
+   "params_source": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next",
+   "quant_format": "GSQ-RCO IQ3_S GGUF + mmproj + refusal vector",
+   "size_bytes": 84525749351,
+   "size_gib": 78.72,
+   "resident_bytes": 84525749351,
+   "license": "qwen-community-license-1.0",
+   "abliterated": true,
+   "public_folder": "abliterated",
+   "status": "done",
+   "engine": "Strata engine (setup per card)",
+   "notes": "Card reports peak 23.8 GB VRAM on its test rig with Strata offload.",
+   "context_native": 262144,
+   "license_note": "Qwen Community License 1.0 (inherited from Flash-Next).",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": 176.94,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": 75.0
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": 75.0
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 92.8,
+   "id": "qwen3-8-flash-next-abliterated-gsq-rco-strata-gguf-gsq-rco"
+  },
+  {
+   "repo": "alesha-pro/GLM-5.3-Flash-abliterated-Maya-M-GGUF",
+   "hf_url": "https://huggingface.co/alesha-pro/GLM-5.3-Flash-abliterated-Maya-M-GGUF",
+   "publisher": "alesha-pro",
+   "family": "GLM-5.3-Flash",
+   "modality": "text+vision LLM",
+   "kind": "abliterated",
+   "params_total_b": 320.0,
+   "params_active_b": 18.0,
+   "moe": true,
+   "params_note": "320B total, 18B active (model card). 288 routed experts, 8 per token; 34 linear + 11 sparse-attention layers (config.json).",
+   "params_source": "https://huggingface.co/zai-org/GLM-5.3-Flash",
+   "quant_format": "Maya-M IQ2_S GGUF + vision + refusal vector",
+   "size_bytes": 117143259589,
+   "size_gib": 109.1,
+   "resident_bytes": 117143259589,
+   "license": "mit",
+   "abliterated": true,
+   "public_folder": "abliterated",
+   "status": "done",
+   "engine": "Project Maya engine + alesha-pro patch ONLY",
+   "notes": "Not mainline llama.cpp. Card: 56 tok/s on 4x RTX 3090 (author's rig).",
+   "context_native": 1048576,
+   "license_note": "MIT: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": 320.76,
+   "fit": {
+    "m5x1": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 127.0,
+   "id": "glm-5-3-flash-abliterated-maya-m-gguf-maya-m"
+  },
+  {
+   "repo": "huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF",
+   "hf_url": "https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF",
+   "publisher": "huihui-ai",
+   "family": "Qwen3.8-27B",
+   "modality": "text+vision LLM",
+   "kind": "abliterated",
+   "params_total_b": 27.0,
+   "params_active_b": 27.0,
+   "moe": false,
+   "params_note": "27B dense (model card). Hybrid attention: 48 linear + 16 full layers (config.json). Native context 262,144.",
+   "params_source": "https://huggingface.co/Qwen/Qwen3.8-27B",
+   "quant_format": "Q4_K GGUF + mmproj",
+   "size_bytes": 17741875547,
+   "size_gib": 16.52,
+   "resident_bytes": 17741875547,
+   "license": "apache-2.0",
+   "abliterated": true,
+   "public_folder": "abliterated",
+   "status": "done",
+   "engine": "llama.cpp / LM Studio / Ollama",
+   "notes": "Small abliterated 27B.",
+   "context_native": 262144,
+   "license_note": "Apache 2.0: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": 27.32,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": 12.3
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": 12.3
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": 23.4
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 22.6,
+   "id": "huihui-qwen3-8-27b-abliterated-gguf-q4-k"
+  },
+  {
+   "repo": "huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF",
+   "hf_url": "https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF",
+   "publisher": "huihui-ai",
+   "family": "Qwen3.8-27B",
+   "modality": "text+vision LLM",
+   "kind": "abliterated",
+   "params_total_b": 27.0,
+   "params_active_b": 27.0,
+   "moe": false,
+   "params_note": "27B dense (model card). Hybrid attention: 48 linear + 16 full layers (config.json). Native context 262,144.",
+   "params_source": "https://huggingface.co/Qwen/Qwen3.8-27B",
+   "quant_format": "BF16 GGUF + mmproj",
+   "size_bytes": 55588895067,
+   "size_gib": 51.77,
+   "resident_bytes": 55588895067,
+   "license": "apache-2.0",
+   "abliterated": true,
+   "public_folder": "abliterated",
+   "status": "done",
+   "engine": "llama.cpp",
+   "notes": "Full-precision abliterated 27B (source for your own quants).",
+   "context_native": 262144,
+   "license_note": "Apache 2.0: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": 27.32,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": 3.9
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": 3.9
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 62.4,
+   "id": "huihui-qwen3-8-27b-abliterated-gguf-bf16"
+  },
+  {
+   "repo": "huihui-ai/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF",
+   "hf_url": "https://huggingface.co/huihui-ai/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF",
+   "publisher": "huihui-ai",
+   "family": "Qwen3.8 Flash-Next",
+   "modality": "text+vision LLM",
+   "kind": "abliterated",
+   "params_total_b": 125.0,
+   "params_active_b": 6.0,
+   "moe": true,
+   "params_note": "125B MoE with 6B activated, plus 51B n-gram embedding and 4B MTP (model card). 512 experts, 10 routed + 1 shared active. Native context 262,144.",
+   "params_source": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next",
+   "quant_format": "UD-Q4_K_XL V2 GGUF (4 shards) + mmproj",
+   "size_bytes": 113424100802,
+   "size_gib": 105.63,
+   "resident_bytes": 113424100802,
+   "license": "qwen-community-1.0",
+   "abliterated": true,
+   "public_folder": "abliterated",
+   "status": "done",
+   "engine": "llama.cpp",
+   "notes": "Slightly over one-box comfort; fine on two boxes.",
+   "context_native": 262144,
+   "license_note": "Qwen Community License 1.0: commercial OK; MaaS/AI-assistant businesses need a separate license; attribution above 100M MAU or $20M/month.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": 176.94,
+   "fit": {
+    "m5x1": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": 45.8
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 123.1,
+   "id": "huihui-qwen3-8-flash-next-abliterated-v2-gguf-ud-q4-k-xl"
+  },
+  {
+   "repo": "huihui-ai/Huihui-GLM-5.3-Flash-abliterated-GGUF",
+   "hf_url": "https://huggingface.co/huihui-ai/Huihui-GLM-5.3-Flash-abliterated-GGUF",
+   "publisher": "huihui-ai",
+   "family": "GLM-5.3-Flash",
+   "modality": "text+vision LLM",
+   "kind": "abliterated",
+   "params_total_b": 320.0,
+   "params_active_b": 18.0,
+   "moe": true,
+   "params_note": "320B total, 18B active (model card). 288 routed experts, 8 per token; 34 linear + 11 sparse-attention layers (config.json).",
+   "params_source": "https://huggingface.co/zai-org/GLM-5.3-Flash",
+   "quant_format": "UD-IQ2_XXS GGUF + mmproj",
+   "size_bytes": 103008971277,
+   "size_gib": 95.93,
+   "resident_bytes": 103008971277,
+   "license": "mit",
+   "abliterated": true,
+   "public_folder": "abliterated",
+   "status": "queued",
+   "engine": "llama.cpp",
+   "notes": "Abliterated twin of the unsloth one-box GLM pick.",
+   "context_native": 1048576,
+   "license_note": "MIT: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": 320.76,
+   "fit": {
+    "m5x1": {
+     "verdict": "offload",
+     "est_tok_s": 37.2
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": 30.5
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 112.2,
+   "id": "huihui-glm-5-3-flash-abliterated-gguf-ud-iq2-xxs"
+  },
+  {
+   "repo": "huihui-ai/Huihui-DeepSeek-V4.1-Flash-1017-abliterated-GGUF",
+   "hf_url": "https://huggingface.co/huihui-ai/Huihui-DeepSeek-V4.1-Flash-1017-abliterated-GGUF",
+   "publisher": "huihui-ai",
+   "family": "DeepSeek V4.1 Flash 1017",
+   "modality": "text+vision LLM",
+   "kind": "abliterated",
+   "params_total_b": 763.2,
+   "params_active_b": null,
+   "moe": true,
+   "params_note": "763.2B per HF safetensors count, including 196.6B of Engram lookup tables (ISTA-DASLab card). 384 routed experts, 6 per token (config.json). Active parameter count is not stated on the official card: unknown.",
+   "params_source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+   "quant_format": "UD-IQ1_M GGUF (5 shards) + mmproj",
+   "size_bytes": 251376566398,
+   "size_gib": 234.11,
+   "resident_bytes": 251376566398,
+   "license": "mit",
+   "abliterated": true,
+   "public_folder": "abliterated",
+   "status": "done",
+   "engine": "llama.cpp (huihui build notes on card)",
+   "notes": "Card: only 18 attn_output tensors ablated. Residency of Engram tensors under mmap not verified, so treated as fully resident.",
+   "context_native": 1048576,
+   "license_note": "MIT: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 267.9,
+   "id": "huihui-deepseek-v4-1-flash-1017-abliterated-gguf-ud-iq1-m"
+  },
+  {
+   "repo": "openai/whisper-large-v3-turbo",
+   "hf_url": "https://huggingface.co/openai/whisper-large-v3-turbo",
+   "publisher": "openai",
+   "family": "Whisper large-v3-turbo",
+   "modality": "speech-to-text",
+   "kind": "media",
+   "params_total_b": 0.809,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "809M params (HF safetensors count).",
+   "params_source": "https://huggingface.co/openai/whisper-large-v3-turbo",
+   "quant_format": "safetensors",
+   "size_bytes": 1622466054,
+   "size_gib": 1.51,
+   "resident_bytes": 1622466054,
+   "license": "mit",
+   "abliterated": false,
+   "public_folder": "media",
+   "status": "queued",
+   "engine": "Transformers / openai-whisper / whisper.cpp (own ggml file)",
+   "notes": "809M params (HF safetensors count).",
+   "context_native": null,
+   "license_note": "MIT: commercial OK.",
+   "non_commercial": false,
+   "fit_note": "On the NAS this is CPU-only and slow (Intel N100).",
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "offload",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 5.6,
+   "id": "whisper-large-v3-turbo-safetensors"
+  },
+  {
+   "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+   "hf_url": "https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+   "publisher": "Qwen",
+   "family": "Qwen3-TTS 1.7B Base",
+   "modality": "text-to-speech (voice clone)",
+   "kind": "media",
+   "params_total_b": 1.93,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "1.93B per HF safetensors count; card: 3-second voice clone, 10 languages.",
+   "params_source": "https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+   "quant_format": "safetensors",
+   "size_bytes": 4544229700,
+   "size_gib": 4.23,
+   "resident_bytes": 4544229700,
+   "license": "apache-2.0",
+   "abliterated": false,
+   "public_folder": "media",
+   "status": "queued",
+   "engine": "qwen-tts (pip)",
+   "notes": "1.93B per HF safetensors count; card: 3-second voice clone, 10 languages.",
+   "context_native": null,
+   "license_note": "Apache 2.0: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 8.5,
+   "id": "qwen3-tts-12hz-1-7b-base-safetensors"
+  },
+  {
+   "repo": "fishaudio/s2-pro",
+   "hf_url": "https://huggingface.co/fishaudio/s2-pro",
+   "publisher": "fishaudio",
+   "family": "Fish Audio S2 Pro",
+   "modality": "text-to-speech",
+   "kind": "media",
+   "params_total_b": 4.56,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "Card: 4B slow AR + 400M fast AR. HF safetensors count 4.56B.",
+   "params_source": "https://huggingface.co/fishaudio/s2-pro",
+   "quant_format": "safetensors",
+   "size_bytes": 11011629649,
+   "size_gib": 10.26,
+   "resident_bytes": 11011629649,
+   "license": "fish-audio-research-license",
+   "abliterated": false,
+   "public_folder": "media",
+   "status": "queued",
+   "engine": "fish-speech",
+   "notes": "Card: 4B slow AR + 400M fast AR. HF safetensors count 4.56B.",
+   "context_native": null,
+   "license_note": "Research/non-commercial free; commercial use needs a separate Fish Audio license (card).",
+   "non_commercial": true,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 15.0,
+   "id": "s2-pro-safetensors"
+  },
+  {
+   "repo": "ACE-Step/Ace-Step1.5",
+   "hf_url": "https://huggingface.co/ACE-Step/Ace-Step1.5",
+   "publisher": "ACE-Step",
+   "family": "ACE-Step 1.5",
+   "modality": "text-to-music",
+   "kind": "media",
+   "params_total_b": null,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "Card: runs locally with under 4 GB VRAM. Total params not stated on card: unknown.",
+   "params_source": "https://huggingface.co/ACE-Step/Ace-Step1.5",
+   "quant_format": "safetensors (turbo DiT + LM)",
+   "size_bytes": 10092102593,
+   "size_gib": 9.4,
+   "resident_bytes": 10092102593,
+   "license": "mit",
+   "abliterated": false,
+   "public_folder": "media",
+   "status": "queued",
+   "engine": "ACE-Step-1.5 (GitHub)",
+   "notes": "Card: runs locally with under 4 GB VRAM. Total params not stated on card: unknown.",
+   "context_native": null,
+   "license_note": "MIT: commercial OK.",
+   "non_commercial": false,
+   "fit_note": "Card: runs locally with less than 4 GB VRAM.",
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 8.0,
+   "id": "ace-step1-5-safetensors"
+  },
+  {
+   "repo": "Comfy-Org/YuE2",
+   "hf_url": "https://huggingface.co/Comfy-Org/YuE2",
+   "publisher": "Comfy-Org",
+   "family": "YuE2 (ComfyUI repack)",
+   "modality": "lyrics-to-music",
+   "kind": "media",
+   "params_total_b": 3.0,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "Base model m-a-p/YuE2-3B (card metadata).",
+   "params_source": "https://huggingface.co/Comfy-Org/YuE2",
+   "quant_format": "bf16 safetensors (ComfyUI)",
+   "size_bytes": 13147793678,
+   "size_gib": 12.24,
+   "resident_bytes": 13147793678,
+   "license": "cc-by-nc-4.0",
+   "abliterated": false,
+   "public_folder": "media",
+   "status": "queued",
+   "engine": "ComfyUI",
+   "notes": "Base model m-a-p/YuE2-3B (card metadata).",
+   "context_native": null,
+   "license_note": "Non-commercial only (CC BY-NC 4.0).",
+   "non_commercial": true,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 17.1,
+   "id": "yue2-bf16"
+  },
+  {
+   "repo": "Qwen/Qwen-Image-2.1",
+   "hf_url": "https://huggingface.co/Qwen/Qwen-Image-2.1",
+   "publisher": "Qwen",
+   "family": "Qwen-Image 2.1",
+   "modality": "text-to-image + editing",
+   "kind": "media",
+   "params_total_b": 7.1,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "Card: 7B visual generation component (32 single-stream DiT layers); repo also holds the text encoder.",
+   "params_source": "https://huggingface.co/Qwen/Qwen-Image-2.1",
+   "quant_format": "safetensors (as published)",
+   "size_bytes": 33134949561,
+   "size_gib": 30.86,
+   "resident_bytes": 33134949561,
+   "license": "qwen-research",
+   "abliterated": false,
+   "public_folder": "usb-media/image",
+   "status": "in-progress",
+   "engine": "Diffusers (QwenImage21Pipeline)",
+   "notes": "Card: 7B visual generation component (32 single-stream DiT layers); repo also holds the text encoder.",
+   "context_native": null,
+   "license_note": "Qwen Research License: NON-COMMERCIAL purposes only (LICENSE file).",
+   "non_commercial": true,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 37.1,
+   "id": "qwen-image-2-1-safetensors"
+  },
+  {
+   "repo": "OpenMOSS-Team/MOSS-Image-Base",
+   "hf_url": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-Base",
+   "publisher": "OpenMOSS-Team",
+   "family": "MOSS-Image Base",
+   "modality": "text-to-image",
+   "kind": "media",
+   "params_total_b": null,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "Param count not stated on card: unknown (HF safetensors count 5.08B for part of the repo).",
+   "params_source": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-Base",
+   "quant_format": "safetensors (as published)",
+   "size_bytes": 27229060663,
+   "size_gib": 25.36,
+   "resident_bytes": 27229060663,
+   "license": "apache-2.0",
+   "abliterated": false,
+   "public_folder": "usb-media/image",
+   "status": "queued",
+   "engine": "Diffusers / ComfyUI (MOSS-Image plugin)",
+   "notes": "Param count not stated on card: unknown (HF safetensors count 5.08B for part of the repo).",
+   "context_native": null,
+   "license_note": "Apache 2.0: commercial OK.",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "offload",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 31.2,
+   "id": "moss-image-base-safetensors"
+  },
+  {
+   "repo": "Wan-AI/Wan2.2-T2V-A14B",
+   "hf_url": "https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B",
+   "publisher": "Wan-AI",
+   "family": "Wan 2.2 T2V A14B",
+   "modality": "text-to-video",
+   "kind": "media",
+   "params_total_b": null,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "Card: MoE video diffusion (high-noise + low-noise experts, A14B), 5 s clips at 480P/720P. Total params not stated: unknown.",
+   "params_source": "https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B",
+   "quant_format": "safetensors (as published)",
+   "size_bytes": 126201624837,
+   "size_gib": 117.53,
+   "resident_bytes": 126201624837,
+   "license": "apache-2.0",
+   "abliterated": false,
+   "public_folder": "usb-media/video",
+   "status": "queued",
+   "engine": "Wan2.2 generate.py / ComfyUI",
+   "notes": "Card: MoE video diffusion (high-noise + low-noise experts, A14B), 5 s clips at 480P/720P. Total params not stated: unknown.",
+   "context_native": null,
+   "license_note": "Apache 2.0: commercial OK.",
+   "non_commercial": false,
+   "fit_note": "Card's single-GPU command uses --offload_model True --convert_model_dtype; high-noise and low-noise experts are used one after the other, so peak memory is well below the repo size.",
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "offload",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "offload",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 130.2,
+   "id": "wan2-2-t2v-a14b-safetensors"
+  },
+  {
+   "repo": "Wan-AI/Wan2.2-I2V-A14B",
+   "hf_url": "https://huggingface.co/Wan-AI/Wan2.2-I2V-A14B",
+   "publisher": "Wan-AI",
+   "family": "Wan 2.2 I2V A14B",
+   "modality": "image-to-video",
+   "kind": "media",
+   "params_total_b": null,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "Card: MoE image-to-video, A14B. Total params not stated: unknown.",
+   "params_source": "https://huggingface.co/Wan-AI/Wan2.2-I2V-A14B",
+   "quant_format": "safetensors (as published)",
+   "size_bytes": 126205359703,
+   "size_gib": 117.54,
+   "resident_bytes": 126205359703,
+   "license": "apache-2.0",
+   "abliterated": false,
+   "public_folder": "usb-media/video",
+   "status": "queued",
+   "engine": "Wan2.2 generate.py / ComfyUI",
+   "notes": "Card: MoE image-to-video, A14B. Total params not stated: unknown.",
+   "context_native": null,
+   "license_note": "Apache 2.0: commercial OK.",
+   "non_commercial": false,
+   "fit_note": "Same offload flags as T2V on the card.",
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "offload",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "offload",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 130.2,
+   "id": "wan2-2-i2v-a14b-safetensors"
+  },
+  {
+   "repo": "tencent/HunyuanVideo-1.5",
+   "hf_url": "https://huggingface.co/tencent/HunyuanVideo-1.5",
+   "publisher": "tencent",
+   "family": "HunyuanVideo 1.5",
+   "modality": "text/image-to-video",
+   "kind": "media",
+   "params_total_b": 8.3,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "Card: 8.3B parameters; repo is large because it ships several resolutions and components.",
+   "params_source": "https://huggingface.co/tencent/HunyuanVideo-1.5",
+   "quant_format": "safetensors (as published)",
+   "size_bytes": 371771118874,
+   "size_gib": 346.24,
+   "resident_bytes": 371771118874,
+   "license": "tencent-hunyuan-community",
+   "abliterated": false,
+   "public_folder": "usb-media/video",
+   "status": "queued",
+   "engine": "HunyuanVideo-1.5 repo / ComfyUI",
+   "notes": "Card: 8.3B parameters; repo is large because it ships several resolutions and components.",
+   "context_native": null,
+   "license_note": "Tencent Hunyuan Community License: does NOT apply in the EU, UK or South Korea; >100M MAU needs a Tencent license.",
+   "non_commercial": false,
+   "fit_note": "Repo ships several resolutions/components (371 GB); one pipeline is loaded at a time. Card: 8.3B params, 'runs smoothly on consumer-grade GPUs'. Memory figure not stated on card: unknown.",
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "offload",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": null,
+   "id": "hunyuanvideo-1-5-safetensors"
+  },
+  {
+   "repo": "black-forest-labs/flux-3-image-klein-comfy",
+   "hf_url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
+   "publisher": "black-forest-labs",
+   "family": "FLUX.3 Klein (ComfyUI)",
+   "modality": "image generation/editing",
+   "kind": "media",
+   "params_total_b": null,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "Gated repo: card not readable without accepting terms. Params unknown.",
+   "params_source": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
+   "quant_format": "unknown (gated)",
+   "size_bytes": 93716186398,
+   "size_gib": 87.28,
+   "resident_bytes": 93716186398,
+   "license": "flux-kommunity-license",
+   "abliterated": false,
+   "public_folder": "not downloaded",
+   "status": "needs-Ian",
+   "engine": "ComfyUI",
+   "notes": "Gated: Ian must accept the terms on Hugging Face while signed in and provide a read token.",
+   "context_native": null,
+   "license_note": "Custom BFL license; read before any commercial use (gated).",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": null,
+   "id": "flux-3-image-klein-comfy-unknown"
+  },
+  {
+   "repo": "Lightricks/LTX-2.5",
+   "hf_url": "https://huggingface.co/Lightricks/LTX-2.5",
+   "publisher": "Lightricks",
+   "family": "LTX-2.5",
+   "modality": "image/text-to-video",
+   "kind": "media",
+   "params_total_b": null,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "Gated repo: card not readable without accepting terms. Params unknown.",
+   "params_source": "https://huggingface.co/Lightricks/LTX-2.5",
+   "quant_format": "unknown (gated)",
+   "size_bytes": 200854145597,
+   "size_gib": 187.06,
+   "resident_bytes": 200854145597,
+   "license": "ltx-2.x-community-license-agreement",
+   "abliterated": false,
+   "public_folder": "not downloaded",
+   "status": "needs-Ian",
+   "engine": "ComfyUI",
+   "notes": "Gated: Ian must accept the terms on Hugging Face while signed in and provide a read token.",
+   "context_native": null,
+   "license_note": "Custom Lightricks community license; read before commercial use (gated).",
+   "non_commercial": false,
+   "fit_note": null,
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": null,
+   "id": "ltx-2-5-unknown"
+  }
+ ]
+}
