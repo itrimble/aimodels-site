@@ -10,6 +10,10 @@ VLABEL = {"fits":"Fits","offload":"Tight / offload","convert":"Quantize first","
 pub = json.loads(json.dumps(C))
 for m in pub['models']:
     m.pop('nas_path', None); m.pop('override', None); m.pop('est_override', None)
+if 'on_device' in pub:
+    pub['on_device'].pop('nas_root', None)
+    for i in pub['on_device']['items']:
+        i.pop('nas_path', None); i['locations']=[{'machine':l['machine']} for l in i['locations']]
 json.dump(pub, open(OUT+'/data/catalog.json','w'), indent=1)
 
 CSS = """
@@ -64,6 +68,21 @@ def fitcell(m,i):
     if f['est_tok_s']: s+=f'<div class="small mut">≈{f["est_tok_s"]} tok/s ceiling</div>'
     return s
 
+OD = C.get('on_device') or {'items':[]}; ODI = OD['items']
+BKP = {"copying":"NAS copy in progress","verified":"Backed up to NAS (verified)","failed":"NAS copy failed"}
+def odsize(b): return f"{b/1e9:.1f} GB" if b>=1e9 else f"{b/1e6:.0f} MB"
+def odbkp(i): return {"copying":'<span class="b in-progress">copying</span>',"verified":'<span class="b done">backed up</span>',"failed":'<span class="b needs-Ian">failed</span>'}.get(i['backup_status'],E(i['backup_status']))
+NCLIC = ("cc-by-nc-4.0","flux-1-dev-non-commercial-license")
+def odrows(items):
+    r=""
+    for i in sorted(items, key=lambda x:-x['size_bytes']):
+        nm = f"<a href='{i['hf_url']}'>{E(i['name'])}</a>" if i.get('hf_url') else E(i['name'])
+        sub = E(i['repo']) if i.get('repo') else ('Ollama library' if i['format'].startswith('Ollama') else 'local file')
+        lic = E(i['license']) + (' <span class="b nc">non-commercial</span>' if i['license'] in NCLIC else '')
+        note = f"<div class='small mut' style='margin-top:4px'>{E(i['notes'])}</div>" if i['notes'] else ''
+        r+=f"<tr><td style='min-width:260px'>{nm}<div class='small mut'>{sub}</div>{note}</td><td>{E(i['use'])}</td><td>{E(i['format'])}</td><td style='white-space:nowrap'>{odsize(i['size_bytes'])}</td><td>{'<br>'.join(E(m) for m in i['macs'])}</td><td>{lic}<div class='small mut'>{E(i['license_source'])}</div></td><td>{odbkp(i)}</td></tr>"
+    return r
+
 # ---------- overview
 cnt = {s: sum(1 for m in MODELS if m['status']==s) for s in ["done","in-progress","queued","needs-Ian"]}
 tot_gib = sum(m['size_gib'] for m in MODELS if m['status']!='needs-Ian')
@@ -79,7 +98,8 @@ body = f"""<h1>Every model we keep, and where it runs.</h1>
 <div class="card"><div class="k">Downloaded</div><div class="v">{cnt['done']}</div></div>
 <div class="card"><div class="k">Downloading now</div><div class="v">{cnt['in-progress']}</div></div>
 <div class="card"><div class="k">Queued</div><div class="v">{cnt['queued']}</div></div>
-<div class="card"><div class="k">Gated, waiting on sign-in</div><div class="v">{cnt['needs-Ian']}</div></div></div>
+<div class="card"><div class="k">Gated, waiting on sign-in</div><div class="v">{cnt['needs-Ian']}</div></div>
+<div class="card"><div class="k">Already on the Macs (<a href="catalog.html#on-device">on-device</a>)</div><div class="v">{len(ODI)}</div></div></div>
 <h2>Bosgame M5: one box vs two</h2>
 <p>One M5 is a Ryzen AI Max+ 395 with 128 GB of unified LPDDR5X at about 210-220 GB/s measured. On Linux about 108-110 GB is usable by the GPU (96 GB cap on Windows). Two boxes linked with llama.cpp RPC give roughly 200-225 GB, which adds <b>capacity, not speed</b>. Mixture-of-experts models are the sweet spot because only the active experts are read per token.</p>
 <div class="wrap"><table><tr><th>Ready-to-run build</th><th>Abliterated</th><th>Est. memory</th><th>M5 ×1</th><th>M5 ×2</th><th>MacBook Pro M4 Max</th></tr>{m5rows(['m5x1','m5x2','mbp'])}</table></div>
@@ -94,6 +114,26 @@ body = f"""<h1>Every model we keep, and where it runs.</h1>
 page("index.html","Overview",body)
 
 # ---------- catalog
+def ondevice_section():
+    if not ODI: return ""
+    per = {}
+    for i in ODI:
+        for m in i['macs']: per.setdefault(m,[0,0]); per[m][0]+=1; per[m][1]+=i['size_bytes']
+    cards = "".join(f'<div class="card"><div class="k">{E(m)}</div><div class="v">{n}</div><div class="small mut">models, {b/1e9:.0f} GB</div></div>' for m,(n,b) in per.items())
+    st = {s: sum(1 for i in ODI if i['backup_status']==s) for s in BKP}
+    stline = "; ".join(f"{BKP[s]}: {n}" for s,n in st.items() if n)
+    remote = "".join(f"<li><b>{E(r['name'])}</b> on the {E(r['machine'])}: {E(r['note'])}.</li>" for r in OD.get('remote_only',[]))
+    nos = "".join(f"<li>{E(r['machine'])}: {E(r['why'])}.</li>" for r in OD.get('not_scanned',[]))
+    nw = "".join(f"<li>{E(x)}</li>" for x in OD.get('no_weights',[]))
+    return f"""<h2 id="on-device">On-device (Mac) models</h2>
+<p class="lead">Models already sitting on the MacBook Pro and the Mac mini, scanned {E(OD['generated'])}. {len(ODI)} unique models, {OD['total_unique_bytes']/1e9:.0f} GB. Each one is being copied once to the NAS's WD drive, so a model on both Macs is backed up a single time. Backup status: {stline}.</p>
+<div class="cards">{cards}<div class="card"><div class="k">Unique total</div><div class="v">{OD['total_unique_bytes']/1e9:.0f} GB</div><div class="small mut">duplicates counted once</div></div></div>
+<div class="wrap"><table><tr><th>Model</th><th>Use</th><th>Format</th><th>Size</th><th>On</th><th>License</th><th>NAS backup</th></tr>{odrows(ODI)}</table></div>
+<p class="small mut">Sizes are measured on the Macs in decimal GB. Licenses come from the Hugging Face card metadata, the GGUF file's own metadata, or the Ollama license layer, as noted under each one; "unknown" means no source states it. Full local and NAS paths are kept in the private catalog, not on this site.</p>
+<h3>Not local weights</h3><ul>{remote}</ul>
+<h3>Not scanned yet</h3><ul>{nos}</ul>
+<h3>Checked, nothing to back up</h3><ul>{nw}</ul>"""
+
 rows=""
 for m in MODELS:
     fitattr = " ".join(f"data-{i}='{m['fit'][i]['verdict']}'" for i in IDS)
@@ -110,6 +150,7 @@ body=f"""<h1>Full catalog</h1><p class="lead">All {len(MODELS)} builds, includin
 <p class="small mut" id="count"></p>
 <div class="wrap"><table id="t"><tr><th>Model</th><th>Modality</th><th>Format</th><th>Params</th><th>Size</th><th>Est. memory</th><th>License</th><th>Abliterated</th><th>Status</th><th>M5 ×1</th><th>M5 ×2</th></tr>{rows}</table></div>
 <p class="small mut">"needs-Ian" = gated repo; the owner has to accept the publisher's terms on Hugging Face first. Machine-readable: <a href="data/catalog.json">data/catalog.json</a>.</p>
+{{ondevice_html}}
 <script>
 const NC={json.dumps([m['license'] for m in MODELS if m['non_commercial']])};
 const $=id=>document.getElementById(id);
@@ -120,7 +161,7 @@ if(fm){{const v=r.getAttribute('data-'+fm);ok=ok&&(v==='fits'||v==='offload');}}
 r.style.display=ok?'':'none';if(ok)n++;}});$('count').textContent=n+' shown (fits filter includes tight/offload)';}}
 ['q','mod','lic','abl','fitm','st'].forEach(i=>$(i).addEventListener('input',f));f();
 </script>"""
-page("catalog.html","Catalog",body)
+page("catalog.html","Catalog",body.replace("{ondevice_html}", ondevice_section()))
 
 # ---------- model detail pages
 RECIPE_HINT = {
@@ -153,10 +194,23 @@ mx="".join(f"<tr><td><a href='models/{m['id']}.html'>{E(m['family'])}</a><div cl
 body=f"""<h1>Fleet and fit matrix</h1><p class="lead">Which model runs on which machine. The Bosgame M5 columns come first because that is the box being planned around.</p>
 <div class="wrap"><table><tr><th>Machine</th><th>CPU</th><th>GPU</th><th>Memory</th><th>Bandwidth</th><th>Fit budget used</th></tr>{fl}</table></div>
 <p class="note">Unknown specs stay unknown: the MacBook Neo was unreachable, and omarchy's current RAM isn't recorded (a 4×32 GB upgrade is planned). Those columns will change once the specs are read.</p>
+<h2 id="holds">What each machine already holds</h2>{{holds_html}}
 <h2>Matrix</h2><div class="wrap"><table><tr><th>Model</th><th>Est. memory</th>{''.join(f'<th>{E(f["name"])}</th>' for f in FLEET)}</tr>{mx}</table></div>
 <h2 id="method">Method</h2><ul>{''.join(f'<li><b>{E(k)}</b>: {E(v)}</li>' for k,v in C['method'].items())}</ul>
 <p class="small mut">Diffusion and speech models don't split across two boxes, so the M5 ×2 column for them means "on either box". Maya, Mirai and Strata builds use forked engines without llama.cpp RPC, so they get "No" on M5 ×2 unless they already fit one box.</p>"""
-page("fleet.html","Fleet & fit",body)
+def holds():
+    rows=""
+    rows+=f"<tr><td><b>Ugreen DXP2800 NAS</b></td><td>The {len(MODELS)}-build archive plus a backup of the Mac models</td><td class='small'>See the <a href='catalog.html'>catalog</a>. Storage only; it doesn't run these.</td></tr>"
+    for mac in OD.get('scanned',[]):
+        its=[i for i in ODI if mac in i['macs']]
+        if not its: continue
+        names=", ".join(E(i['name']) for i in sorted(its,key=lambda x:-x['size_bytes']))
+        rows+=f"<tr><td><b>{E(mac)}</b></td><td>{len(its)} models, {sum(i['size_bytes'] for i in its)/1e9:.0f} GB</td><td class='small'>{names}. <a href='catalog.html#on-device'>Details</a></td></tr>"
+    for r in OD.get('not_scanned',[]):
+        rows+=f"<tr><td><b>{E(r['machine'])}</b></td><td>not scanned</td><td class='small mut'>{E(r['why'])}.</td></tr>"
+    rows+="<tr><td><b>Bosgame M5 (x1 / x2)</b></td><td>not bought yet</td><td class='small mut'>Would load from the NAS archive.</td></tr>"
+    return f"<div class='wrap'><table><tr><th>Machine</th><th>Holds</th><th>What</th></tr>{rows}</table></div>"
+page("fleet.html","Fleet & fit",body.replace("{holds_html}", holds()))
 
 # ---------- recipes
 body = """<h1>Recipes</h1><p class="lead">Copy-paste starting points. Paths are placeholders (<code>/models/...</code>); swap in your own. Check each tool's <code>--help</code> on your build, because flags change between releases.</p>
@@ -323,6 +377,6 @@ Static site for aimodels.remnantsecurity.com: Remnant Security's local AI model 
 - Generated from `data/catalog.json` by `tools/build_site.py`. Facts come from Hugging Face model cards; memory and token/s figures are labelled estimates.
 - Preview locally: `python3 -m http.server 8000` and open http://localhost:8000/
 
-Not yet live: needs merge, GitHub Pages enabled on `main`, and a DNS CNAME `aimodels` -> `itrimble.github.io`.
+Live at https://aimodels.remnantsecurity.com (GitHub Pages from `main`).
 """)
 print("pages:", sum(len(f) for _,_,f in os.walk(OUT)))
