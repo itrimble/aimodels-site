@@ -1786,5 +1786,923 @@
    "est_memory_gb": null,
    "id": "ltx-2-5-unknown"
   }
- ]
+ ],
+ "on_device": {
+  "generated": "2026-11-15 (America/Chicago)",
+  "scanned": [
+   "MacBook Pro (M4 Max)",
+   "Mac mini (M4)"
+  ],
+  "not_scanned": [
+   {
+    "machine": "omarchy (AMD desktop)",
+    "why": "SSH over Tailscale timed out on Nov 15"
+   },
+   {
+    "machine": "MacBook Neo",
+    "why": "offline on Nov 15"
+   }
+  ],
+  "remote_only": [
+   {
+    "machine": "MacBook Pro (M4 Max)",
+    "name": "Ollama minimax-m2:cloud",
+    "note": "Ollama cloud link (manifest only, no local weights)"
+   },
+   {
+    "machine": "MacBook Pro (M4 Max)",
+    "name": "Ollama gpt-oss:120b-cloud",
+    "note": "Ollama cloud link (manifest only, no local weights)"
+   }
+  ],
+  "no_weights": [
+   "MBP HF cache entries with refs only (nothing downloaded): ahmadw/YuE2-3B-MLX, mlx-community/bge-m3-mlx-8bit, mlx-community/gemma-4-26b-a4b-it-4bit, mlx-community/gemma-4-e4b-it-4bit, mlx-works/Ornith-1.5-35B-A3B-oQ4e-mtp; unsloth/gemma-4-26B-A4B-it (config files only, 27 KB). Mac mini: ahmadw/YuE2-3B-MLX, mlx-community/bge-m3-mlx-8bit (refs only).",
+   "Mac mini ~/.hermes (Hermes agent install, 16 GB): no file over 1 GB; largest are its state database, backups and a git pack, none of them model weights. Not copied."
+  ],
+  "items": [
+   {
+    "id": "z-image-turbo",
+    "name": "Z-Image Turbo",
+    "repo": "Tongyi-MAI/Z-Image-Turbo",
+    "format": "safetensors (Diffusers)",
+    "size_bytes": 32848304893,
+    "use": "image generation",
+    "license": "apache-2.0",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "notes": "Weights live in the cache's shared blob store (hf-hub/blobs), copied alongside.",
+    "license_source": "Hugging Face card metadata",
+    "hf_url": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
+    "size_gib": 30.59,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "pplx-computer-qwen38-27b-mlx",
+    "name": "Perplexity Computer Qwen3.8-27B (MLX)",
+    "repo": "perplexity-ai/pplx-computer-qwen-3-8-27b-mlx-20260824",
+    "format": "MLX safetensors",
+    "size_bytes": 16333696870,
+    "use": "chat / vision LLM (image-text-to-text)",
+    "license": "other",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "notes": "Card says license: other and names no license; read the card before commercial use. Base: Qwen/Qwen3.8-27B.",
+    "license_source": "Hugging Face card metadata",
+    "hf_url": "https://huggingface.co/perplexity-ai/pplx-computer-qwen-3-8-27b-mlx-20260824",
+    "size_gib": 15.21,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "pplx-pii-masking-mlx",
+    "name": "Perplexity PII masking (MLX)",
+    "repo": "perplexity-ai/PII-Tracer-MLX",
+    "format": "MLX safetensors",
+    "size_bytes": 790891332,
+    "use": "PII detection / masking (token classification)",
+    "license": "mit",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "notes": "Downloaded as perplexity-ai/pplx-pii-masking-MLX; Hugging Face now redirects that name to perplexity-ai/PII-Tracer-MLX. LICENSE file in the snapshot is MIT.",
+    "license_source": "Hugging Face card metadata",
+    "hf_url": "https://huggingface.co/perplexity-ai/PII-Tracer-MLX",
+    "size_gib": 0.74,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "qwen36-35b-a3b-mlx-3bit",
+    "name": "Qwen3.6-35B-A3B UD MLX 3-bit",
+    "repo": "unsloth/Qwen3.6-35B-A3B-UD-MLX-3bit",
+    "format": "MLX safetensors (3-bit)",
+    "size_bytes": 17392633006,
+    "use": "chat / vision LLM",
+    "license": "apache-2.0",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-UD-MLX-3bit",
+    "size_gib": 16.2,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "qwen38-27b-ud-q4kxl",
+    "name": "Qwen3.8-27B UD-Q4_K_XL + mmproj-F16",
+    "repo": "unsloth/Qwen3.8-27B-GGUF",
+    "format": "GGUF",
+    "size_bytes": 18851002112,
+    "use": "chat / vision LLM",
+    "license": "apache-2.0",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "notes": "Not a duplicate: the NAS text archive holds the UD-Q8_K_XL file from this repo, not UD-Q4_K_XL or mmproj-F16, so these were copied. ~/models/Qwen3.8-27B-IQ4_XS.gguf on the MBP is only a symlink to this Q4_K_XL file.",
+    "license_source": "Hugging Face card metadata",
+    "hf_url": "https://huggingface.co/unsloth/Qwen3.8-27B-GGUF",
+    "size_gib": 17.56,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "bge-small-en-gguf",
+    "name": "bge-small-en v1.5 (GGUF f16)",
+    "repo": "unsloth/bge-small-en-v1.5-GGUF",
+    "format": "GGUF (f16)",
+    "size_bytes": 67582560,
+    "use": "embeddings",
+    "license": "mit",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/unsloth/bge-small-en-v1.5-GGUF",
+    "size_gib": 0.06,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "seedvr2-comfyui",
+    "name": "SeedVR2 (ComfyUI)",
+    "repo": "numz/SeedVR2_comfyUI",
+    "format": "safetensors (fp16)",
+    "size_bytes": 7284343622,
+    "use": "video / image upscaling and restoration (video-to-video)",
+    "license": "apache-2.0",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     },
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "notes": "Same files on both Macs (names and byte sizes match); backed up once from the MacBook Pro. 3B fp16 model + VAE.",
+    "license_source": "Hugging Face card metadata",
+    "hf_url": "https://huggingface.co/numz/SeedVR2_comfyUI",
+    "size_gib": 6.78,
+    "macs": [
+     "Mac mini (M4)",
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "ornith-15-9b-oq4e",
+    "name": "Ornith 1.5 9B oQ4e-mtp (MLX)",
+    "repo": "mlx-works/Ornith-1.5-9B-oQ4e-mtp",
+    "format": "MLX safetensors (mixed 4/5-bit, oQ)",
+    "size_bytes": 6245547422,
+    "use": "chat LLM (served by oMLX)",
+    "license": "unknown",
+    "license_source": "Quant card states no license; base model ornith-ai/Ornith-1.5-9B is mit",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     },
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "notes": "Four copies of the same weights (HF cache + oMLX folder on each Mac; names and sizes match). Backed up from the MacBook Pro only. Qwen3.5-9B based.",
+    "hf_url": "https://huggingface.co/mlx-works/Ornith-1.5-9B-oQ4e-mtp",
+    "size_gib": 5.82,
+    "macs": [
+     "Mac mini (M4)",
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "depth-anything-v2-small",
+    "name": "Depth Anything V2 Small",
+    "repo": "depth-anything/Depth-Anything-V2-Small-hf",
+    "format": "safetensors",
+    "size_bytes": 99175385,
+    "use": "depth estimation",
+    "license": "apache-2.0",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     },
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "notes": "Identical on both Macs; backed up once.",
+    "license_source": "Hugging Face card metadata",
+    "hf_url": "https://huggingface.co/depth-anything/Depth-Anything-V2-Small-hf",
+    "size_gib": 0.09,
+    "macs": [
+     "Mac mini (M4)",
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "claude-tokenizer",
+    "name": "Claude tokenizer (Xenova)",
+    "repo": "Xenova/claude-tokenizer",
+    "format": "tokenizer.json (no weights)",
+    "size_bytes": 1774213,
+    "use": "token counting (tokenizer only, not a model)",
+    "license": "mit",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     },
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/Xenova/claude-tokenizer",
+    "size_gib": 0.0,
+    "macs": [
+     "Mac mini (M4)",
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "bge-m3-mlx-8bit",
+    "name": "bge-m3 MLX 8-bit",
+    "repo": "mlx-community/bge-m3-mlx-8bit",
+    "format": "MLX safetensors (8-bit)",
+    "size_bytes": 620779256,
+    "use": "embeddings",
+    "license": "mit",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     },
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "notes": "Same weight files on both Macs; the MBP folder has 14 more small files (25 vs 11), so the MBP copy was backed up.",
+    "license_source": "Hugging Face card metadata",
+    "hf_url": "https://huggingface.co/mlx-community/bge-m3-mlx-8bit",
+    "size_gib": 0.58,
+    "macs": [
+     "Mac mini (M4)",
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "gemma4-26b-a4b-mlx-4bit",
+    "name": "Gemma 4 26B-A4B it MLX 4-bit",
+    "repo": "mlx-community/gemma-4-26b-a4b-it-4bit",
+    "format": "MLX safetensors (4-bit)",
+    "size_bytes": 15373592206,
+    "use": "chat / vision LLM",
+    "license": "apache-2.0",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/mlx-community/gemma-4-26b-a4b-it-4bit",
+    "size_gib": 14.32,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "flux-schnell-q8-local",
+    "name": "FLUX schnell Q8 (local Diffusers save)",
+    "repo": null,
+    "format": "safetensors (Diffusers, 8-bit)",
+    "size_bytes": 18000699218,
+    "use": "image generation",
+    "license": "unknown",
+    "license_source": "Local conversion; the source repo isn't recorded in its files",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "notes": "Saved locally Oct 18 (flux-save.log). Name suggests FLUX.1-schnell, but the files don't say, so the license is left unknown.",
+    "hf_url": null,
+    "size_gib": 16.76,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "yue2-3b-mlx-8bit",
+    "name": "YuE2 3B MLX 8-bit (local conversion)",
+    "repo": null,
+    "format": "MLX safetensors (8-bit) + MLX VAE",
+    "size_bytes": 4532530702,
+    "use": "music generation",
+    "license": "cc-by-nc-4.0",
+    "license_source": "Converted from m-a-p/YuE2-3B (per convert.py); that card is cc-by-nc-4.0",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     },
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "notes": "Non-commercial. Same 8bit/ files on both Macs; backed up once with its convert/generate scripts. venv and outputs/ not copied.",
+    "hf_url": null,
+    "size_gib": 4.22,
+    "macs": [
+     "Mac mini (M4)",
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "qwen38-27b-dflash2",
+    "name": "Qwen3.8-27B DFlash2 draft model",
+    "repo": null,
+    "format": "safetensors (bf16)",
+    "size_bytes": 3848819135,
+    "use": "speculative-decoding draft head for Qwen3.8-27B (experiment)",
+    "license": "unknown",
+    "license_source": "Local experiment; no license metadata",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "notes": "config.json architecture: DFlash2DraftModel.",
+    "hf_url": null,
+    "size_gib": 3.58,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "dflash2-v2-gguf",
+    "name": "DFlash2 v2 Q4_K_M self16 (GGUF)",
+    "repo": null,
+    "format": "GGUF",
+    "size_bytes": 1327654720,
+    "use": "speculative-decoding draft (experiment)",
+    "license": "unknown",
+    "license_source": "GGUF metadata has no license field",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "notes": "GGUF architecture: dflash, name qwen38-27b-dflash2.",
+    "hf_url": null,
+    "size_gib": 1.24,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "qwen38-27b-tail-iq4xs",
+    "name": "Qwen3.8-27B tail L=40 IQ4_XS (partial GGUF)",
+    "repo": null,
+    "format": "GGUF (IQ4_XS, partial)",
+    "size_bytes": 7719767296,
+    "use": "experiment: layers from 40 on, no output head",
+    "license": "apache-2.0",
+    "license_source": "GGUF metadata (base Qwen/Qwen3.8-27B, quantized by Unsloth)",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "notes": "Not a standalone runnable model.",
+    "hf_url": null,
+    "size_gib": 7.19,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "whisper-tiny-en",
+    "name": "Whisper tiny.en (openai-whisper)",
+    "repo": "openai/whisper-tiny.en",
+    "format": "PyTorch .pt",
+    "size_bytes": 75571315,
+    "use": "speech-to-text",
+    "license": "apache-2.0",
+    "locations": [
+     {
+      "machine": "MacBook Pro (M4 Max)"
+     }
+    ],
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/openai/whisper-tiny.en",
+    "size_gib": 0.07,
+    "macs": [
+     "MacBook Pro (M4 Max)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "black-forest-labs/FLUX.1-dev",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "flux1-dev",
+    "name": "FLUX.1 dev",
+    "format": "safetensors (Diffusers)",
+    "size_bytes": 33746382743,
+    "use": "image generation",
+    "license": "flux-1-dev-non-commercial-license",
+    "notes": "Non-commercial.",
+    "license_source": "Hugging Face card metadata",
+    "hf_url": "https://huggingface.co/black-forest-labs/FLUX.1-dev",
+    "size_gib": 31.43,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "black-forest-labs/FLUX.1-schnell",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "flux1-schnell",
+    "name": "FLUX.1 schnell",
+    "format": "safetensors (Diffusers)",
+    "size_bytes": 33725922192,
+    "use": "image generation",
+    "license": "apache-2.0",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/black-forest-labs/FLUX.1-schnell",
+    "size_gib": 31.41,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "mlx-community/Qwen3-TTS-12Hz-1.7B-CustomVoice-8bit",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "qwen3-tts-1.7b-cv-8bit",
+    "name": "Qwen3-TTS 1.7B CustomVoice MLX 8-bit",
+    "format": "MLX safetensors (8-bit)",
+    "size_bytes": 3080141538,
+    "use": "text-to-speech",
+    "license": "apache-2.0",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/mlx-community/Qwen3-TTS-12Hz-1.7B-CustomVoice-8bit",
+    "size_gib": 2.87,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "qwen3-tts-0.6b-cv-8bit",
+    "name": "Qwen3-TTS 0.6B CustomVoice MLX 8-bit",
+    "format": "MLX safetensors (8-bit)",
+    "size_bytes": 1973572801,
+    "use": "text-to-speech",
+    "license": "apache-2.0",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit",
+    "size_gib": 1.84,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "mlx-community/Qwen3.5-4B-MLX-4bit",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "qwen35-4b-mlx-4bit",
+    "name": "Qwen3.5 4B MLX 4-bit",
+    "format": "MLX safetensors (4-bit)",
+    "size_bytes": 3061132920,
+    "use": "chat LLM",
+    "license": "apache-2.0",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/mlx-community/Qwen3.5-4B-MLX-4bit",
+    "size_gib": 2.85,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "mlx-community/Qwen3.5-2B-MLX-4bit",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "qwen35-2b-mlx-4bit",
+    "name": "Qwen3.5 2B MLX 4-bit",
+    "format": "MLX safetensors (4-bit)",
+    "size_bytes": 1749083534,
+    "use": "chat LLM",
+    "license": "apache-2.0",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/mlx-community/Qwen3.5-2B-MLX-4bit",
+    "size_gib": 1.63,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "facebook/w2v-bert-2.0",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "w2v-bert-2",
+    "name": "w2v-BERT 2.0",
+    "format": "safetensors",
+    "size_bytes": 2322065885,
+    "use": "speech encoder (audio feature extraction)",
+    "license": "mit",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/facebook/w2v-bert-2.0",
+    "size_gib": 2.16,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "neuphonic/neucodec",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "neucodec",
+    "name": "NeuCodec",
+    "format": "PyTorch .bin",
+    "size_bytes": 2321024854,
+    "use": "neural audio codec (used by NeuTTS)",
+    "license": "apache-2.0",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/neuphonic/neucodec",
+    "size_gib": 2.16,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "neuphonic/neutts-air-q4-gguf",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "neutts-air-q4",
+    "name": "NeuTTS Air Q4 (GGUF)",
+    "format": "GGUF (Q4_0)",
+    "size_bytes": 527054304,
+    "use": "text-to-speech",
+    "license": "apache-2.0",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/neuphonic/neutts-air-q4-gguf",
+    "size_gib": 0.49,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "google/embeddinggemma-2",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "embeddinggemma-2",
+    "name": "EmbeddingGemma 2",
+    "format": "safetensors",
+    "size_bytes": 1521119809,
+    "use": "embeddings",
+    "license": "apache-2.0",
+    "notes": "~/models/embeddinggemma-2 holds only demo scripts; the weights are in the HF cache.",
+    "license_source": "Hugging Face card metadata",
+    "hf_url": "https://huggingface.co/google/embeddinggemma-2",
+    "size_gib": 1.42,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "laion/CLIP-ViT-B-32-laion2B-s34B-b79K",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "clip-vit-b32-laion2b",
+    "name": "CLIP ViT-B/32 (LAION-2B)",
+    "format": "safetensors (open_clip)",
+    "size_bytes": 605143316,
+    "use": "image-text embeddings / zero-shot image classification",
+    "license": "mit",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/laion/CLIP-ViT-B-32-laion2B-s34B-b79K",
+    "size_gib": 0.56,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "hexgrad/Kokoro-82M",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "kokoro-82m",
+    "name": "Kokoro 82M",
+    "format": "PyTorch .pth",
+    "size_bytes": 327738002,
+    "use": "text-to-speech",
+    "license": "apache-2.0",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "size_gib": 0.31,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "mlx-community/Kokoro-82M-8bit",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "kokoro-82m-mlx-8bit",
+    "name": "Kokoro 82M MLX 8-bit",
+    "format": "MLX safetensors (8-bit)",
+    "size_bytes": 317533045,
+    "use": "text-to-speech",
+    "license": "apache-2.0",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/mlx-community/Kokoro-82M-8bit",
+    "size_gib": 0.3,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "repo": "Systran/faster-whisper-base",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "id": "faster-whisper-base",
+    "name": "faster-whisper base",
+    "format": "CTranslate2",
+    "size_bytes": 147882941,
+    "use": "speech-to-text",
+    "license": "mit",
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/Systran/faster-whisper-base",
+    "size_gib": 0.14,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "gemma4-e4b-mlx-4bit",
+    "name": "Gemma 4 E4B it MLX 4-bit",
+    "repo": "mlx-community/gemma-4-e4b-it-4bit",
+    "format": "MLX safetensors (4-bit)",
+    "size_bytes": 5179241512,
+    "use": "chat / vision LLM",
+    "license": "gemma",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "license_source": "Hugging Face card metadata",
+    "notes": "",
+    "hf_url": "https://huggingface.co/mlx-community/gemma-4-e4b-it-4bit",
+    "size_gib": 4.82,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "mellum21-12b-thinking-q4km",
+    "name": "Mellum2.1 12B-A2.5B Thinking Q4_K_M",
+    "repo": null,
+    "format": "GGUF (Q4_K_M)",
+    "size_bytes": 8071295264,
+    "use": "LLM (JetBrains Mellum, thinking variant)",
+    "license": "apache-2.0",
+    "license_source": "GGUF metadata (base JetBrains/Mellum2-12B-A2.5B-Base, whose card is also apache-2.0)",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "notes": "MoE (GGUF size label 64x1.2B).",
+    "hf_url": null,
+    "size_gib": 7.52,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "ollama-gemma4-e4b",
+    "name": "Ollama gemma4:e4b",
+    "repo": null,
+    "format": "Ollama (GGUF blobs)",
+    "size_bytes": 9608350718,
+    "use": "chat LLM",
+    "license": "Apache License",
+    "license_source": "First line of the model's Ollama license layer",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "notes": "Whole Ollama store copied (blobs + manifests), so it can be restored by copying back to ~/.ollama/models.",
+    "hf_url": null,
+    "size_gib": 8.95,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "ollama-qwen35-9b",
+    "name": "Ollama qwen3.5:9b",
+    "repo": null,
+    "format": "Ollama (GGUF blobs)",
+    "size_bytes": 6594474711,
+    "use": "chat LLM",
+    "license": "Apache License",
+    "license_source": "First line of the model's Ollama license layer",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "notes": "Whole Ollama store copied (blobs + manifests), so it can be restored by copying back to ~/.ollama/models.",
+    "hf_url": null,
+    "size_gib": 6.14,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "ollama-qwen3-8b",
+    "name": "Ollama qwen3:8b",
+    "repo": null,
+    "format": "Ollama (GGUF blobs)",
+    "size_bytes": 5225388164,
+    "use": "chat LLM",
+    "license": "Apache License",
+    "license_source": "First line of the model's Ollama license layer",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "notes": "Whole Ollama store copied (blobs + manifests), so it can be restored by copying back to ~/.ollama/models.",
+    "hf_url": null,
+    "size_gib": 4.87,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "ollama-gemma3-4b",
+    "name": "Ollama gemma3:4b",
+    "repo": null,
+    "format": "Ollama (GGUF blobs)",
+    "size_bytes": 3338801804,
+    "use": "chat LLM",
+    "license": "Gemma Terms of Use",
+    "license_source": "First line of the model's Ollama license layer",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "notes": "Whole Ollama store copied (blobs + manifests), so it can be restored by copying back to ~/.ollama/models.",
+    "hf_url": null,
+    "size_gib": 3.11,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   },
+   {
+    "id": "ollama-qwen3-4b",
+    "name": "Ollama qwen3:4b",
+    "repo": null,
+    "format": "Ollama (GGUF blobs)",
+    "size_bytes": 2497293931,
+    "use": "chat LLM",
+    "license": "Apache License",
+    "license_source": "First line of the model's Ollama license layer",
+    "locations": [
+     {
+      "machine": "Mac mini (M4)"
+     }
+    ],
+    "notes": "Whole Ollama store copied (blobs + manifests), so it can be restored by copying back to ~/.ollama/models.",
+    "hf_url": null,
+    "size_gib": 2.33,
+    "macs": [
+     "Mac mini (M4)"
+    ],
+    "backup_status": "copying"
+   }
+  ],
+  "total_unique_bytes": 277355009251
+ }
 }
