@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-16 14:48:16 CST",
+ "generated": "2026-11-16 15:14:50 CST",
  "method": {
   "memory": "Estimated memory = resident weight bytes x 1.05 + 4 GB (runtime + about 32K tokens of KV cache) for LLMs; media = files + 4 GB, an upper bound since ComfyUI/Diffusers offload components. Estimates, not measurements.",
   "tok_s": "Token/s = memory bandwidth / (active params x bits-per-weight / 8). Bits-per-weight = GGUF bytes x 8 / GGUF parameter count. This is a theoretical ceiling for generation; real numbers are usually well below it. Two-box figures take off 18% for RPC only when the model does not fit one box (otherwise run it on one box). Not given where active params are unknown or the model needs conversion.",
@@ -1065,6 +1065,66 @@
    },
    "est_memory_gb": 267.9,
    "id": "huihui-deepseek-v4-1-flash-1017-abliterated-gguf-ud-iq1-m"
+  },
+  {
+   "repo": "mradermacher/gemma-4-26B-A4B-it-heretic-NSFW-GGUF",
+   "hf_url": "https://huggingface.co/mradermacher/gemma-4-26B-A4B-it-heretic-NSFW-GGUF",
+   "publisher": "mradermacher",
+   "family": "Gemma 4 26B-A4B",
+   "modality": "text+vision LLM",
+   "kind": "abliterated",
+   "params_total_b": 25.2,
+   "params_active_b": 3.8,
+   "moe": true,
+   "params_note": "Official Gemma 4 26B A4B MoE: 25.2B total / 3.8B active; 8 active of 128 experts + 1 shared; vision encoder ~550M. Native context 256K.",
+   "params_source": "https://ai.google.dev/gemma/docs/core/model_card_4",
+   "quant_format": "Q4_K_M + Q6_K + Q8_0 GGUF + mmproj (Q8_0 + f16)",
+   "size_bytes": 68293753442,
+   "size_gib": 63.61,
+   "resident_bytes": 28052920576,
+   "license": "apache-2.0",
+   "abliterated": true,
+   "public_folder": "abliterated",
+   "status": "done",
+   "engine": "llama.cpp / LM Studio / Ollama",
+   "notes": "Heretic/abliterated static GGUF of yukiworks/gemma-4-26B-A4B-it-heretic-NSFW (Google Gemma 4 26B-A4B it). Archive is selected quants only (Q4_K_M, Q6_K, Q8_0 + both mmproj + README), not the full repo. Memory and fit are for Q8_0 + mmproj-f16; Q4_K_M + mmproj-f16 is about 22.9 GB estimated and would fit the MacBook Pro default budget.",
+   "context_native": 262144,
+   "license_note": "Card lists apache-2.0 and also links the Gemma 4 license (https://ai.google.dev/gemma/docs/gemma_4_license).",
+   "non_commercial": false,
+   "fit_note": "Memory/fit use Q8_0 + mmproj-f16 (largest runnable set in this folder), not the sum of all archived quants.",
+   "gguf_params_b": 25.23,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": 50.9
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": 50.9
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": 33.5,
+   "id": "gemma-4-26b-a4b-it-heretic-nsfw-gguf-selected"
   },
   {
    "repo": "openai/whisper-large-v3-turbo",
