@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Wrapper so `scripts/sync-catalog` works from a checkout.
+# Preferred host: the MacBook Pro, which can SSH to the NAS.
+# Do not install this as cron on the NAS and do not store credentials there.
+set -euo pipefail
+here=$(cd "$(dirname "$0")" && pwd)
+exec python3 "$here/sync_catalog.py" "$@"

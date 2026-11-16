@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-14 (America/Chicago)",
+ "generated": "2026-11-16 14:48:16 CST",
  "method": {
   "memory": "Estimated memory = resident weight bytes x 1.05 + 4 GB (runtime + about 32K tokens of KV cache) for LLMs; media = files + 4 GB, an upper bound since ComfyUI/Diffusers offload components. Estimates, not measurements.",
   "tok_s": "Token/s = memory bandwidth / (active params x bits-per-weight / 8). Bits-per-weight = GGUF bytes x 8 / GGUF parameter count. This is a theoretical ceiling for generation; real numbers are usually well below it. Two-box figures take off 18% for RPC only when the model does not fit one box (otherwise run it on one box). Not given where active params are unknown or the model needs conversion.",
@@ -425,7 +425,7 @@
    "license": "qwen-community-1.0",
    "abliterated": false,
    "public_folder": "official",
-   "status": "in-progress",
+   "status": "done",
    "engine": "llama.cpp / LM Studio",
    "notes": "One-box pick for Flash-Next.",
    "context_native": 262144,
@@ -485,7 +485,7 @@
    "license": "mit",
    "abliterated": false,
    "public_folder": "official",
-   "status": "queued",
+   "status": "done",
    "engine": "llama.cpp",
    "notes": "Tight one-box pick (2-bit).",
    "context_native": 1048576,
@@ -539,13 +539,13 @@
    "params_note": "763.2B per HF safetensors count, including 196.6B of Engram lookup tables (ISTA-DASLab card). 384 routed experts, 6 per token (config.json). Active parameter count is not stated on the official card: unknown.",
    "params_source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
    "quant_format": "GSQ-RCO IQ1_M backbone + shared Engram IQ4_NL + mmproj",
-   "size_bytes": 232288767636,
-   "size_gib": 216.34,
+   "size_bytes": 342884058452,
+   "size_gib": 319.34,
    "resident_bytes": 120720000000.0,
    "license": "mit",
    "abliterated": false,
    "public_folder": "official",
-   "status": "queued",
+   "status": "done",
    "engine": "llama.cpp (build from Oct 27 2026 or later)",
    "notes": "Backbone 120.72 GB must be resident; the 110.60 GB Engram file can stay memory-mapped on SSD (ISTA card). Engram must be linked as shard 6.",
    "context_native": 1048576,
@@ -965,7 +965,7 @@
    "license": "mit",
    "abliterated": true,
    "public_folder": "abliterated",
-   "status": "queued",
+   "status": "done",
    "engine": "llama.cpp",
    "notes": "Abliterated twin of the unsloth one-box GLM pick.",
    "context_native": 1048576,
@@ -1085,7 +1085,7 @@
    "license": "mit",
    "abliterated": false,
    "public_folder": "media",
-   "status": "queued",
+   "status": "done",
    "engine": "Transformers / openai-whisper / whisper.cpp (own ggml file)",
    "notes": "809M params (HF safetensors count).",
    "context_native": null,
@@ -1145,7 +1145,7 @@
    "license": "apache-2.0",
    "abliterated": false,
    "public_folder": "media",
-   "status": "queued",
+   "status": "done",
    "engine": "qwen-tts (pip)",
    "notes": "1.93B per HF safetensors count; card: 3-second voice clone, 10 languages.",
    "context_native": null,
@@ -1205,7 +1205,7 @@
    "license": "fish-audio-research-license",
    "abliterated": false,
    "public_folder": "media",
-   "status": "queued",
+   "status": "done",
    "engine": "fish-speech",
    "notes": "Card: 4B slow AR + 400M fast AR. HF safetensors count 4.56B.",
    "context_native": null,
@@ -1265,7 +1265,7 @@
    "license": "mit",
    "abliterated": false,
    "public_folder": "media",
-   "status": "queued",
+   "status": "done",
    "engine": "ACE-Step-1.5 (GitHub)",
    "notes": "Card: runs locally with under 4 GB VRAM. Total params not stated on card: unknown.",
    "context_native": null,
@@ -1325,7 +1325,7 @@
    "license": "cc-by-nc-4.0",
    "abliterated": false,
    "public_folder": "media",
-   "status": "queued",
+   "status": "done",
    "engine": "ComfyUI",
    "notes": "Base model m-a-p/YuE2-3B (card metadata).",
    "context_native": null,
@@ -1385,7 +1385,7 @@
    "license": "qwen-research",
    "abliterated": false,
    "public_folder": "usb-media/image",
-   "status": "in-progress",
+   "status": "done",
    "engine": "Diffusers (QwenImage21Pipeline)",
    "notes": "Card: 7B visual generation component (32 single-stream DiT layers); repo also holds the text encoder.",
    "context_native": null,
@@ -1445,7 +1445,7 @@
    "license": "apache-2.0",
    "abliterated": false,
    "public_folder": "usb-media/image",
-   "status": "queued",
+   "status": "done",
    "engine": "Diffusers / ComfyUI (MOSS-Image plugin)",
    "notes": "Param count not stated on card: unknown (HF safetensors count 5.08B for part of the repo).",
    "context_native": null,
@@ -1505,7 +1505,7 @@
    "license": "apache-2.0",
    "abliterated": false,
    "public_folder": "usb-media/video",
-   "status": "queued",
+   "status": "done",
    "engine": "Wan2.2 generate.py / ComfyUI",
    "notes": "Card: MoE video diffusion (high-noise + low-noise experts, A14B), 5 s clips at 480P/720P. Total params not stated: unknown.",
    "context_native": null,
@@ -1565,7 +1565,7 @@
    "license": "apache-2.0",
    "abliterated": false,
    "public_folder": "usb-media/video",
-   "status": "queued",
+   "status": "done",
    "engine": "Wan2.2 generate.py / ComfyUI",
    "notes": "Card: MoE image-to-video, A14B. Total params not stated: unknown.",
    "context_native": null,
@@ -1625,7 +1625,7 @@
    "license": "tencent-hunyuan-community",
    "abliterated": false,
    "public_folder": "usb-media/video",
-   "status": "queued",
+   "status": "done",
    "engine": "HunyuanVideo-1.5 repo / ComfyUI",
    "notes": "Card: 8.3B parameters; repo is large because it ships several resolutions and components.",
    "context_native": null,
@@ -1673,25 +1673,25 @@
    "family": "FLUX.3 Klein (ComfyUI)",
    "modality": "image generation/editing",
    "kind": "media",
-   "params_total_b": null,
+   "params_total_b": 5.6,
    "params_active_b": null,
    "moe": false,
-   "params_note": "Gated repo: card not readable without accepting terms. Params unknown.",
+   "params_note": "Card: 5.6B image transformer; Qwen3-VL-4B text encoder is separate. Repo ships distilled and base checkpoints in several quants plus a prompt upsampler. One pipeline is loaded at a time, so peak memory is well below the pack size.",
    "params_source": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
-   "quant_format": "unknown (gated)",
-   "size_bytes": 93716186398,
+   "quant_format": "safetensors (ComfyUI pack: BF16, int8, NVFP4)",
+   "size_bytes": 93720414762,
    "size_gib": 87.28,
-   "resident_bytes": 93716186398,
+   "resident_bytes": 93720414762,
    "license": "flux-kommunity-license",
    "abliterated": false,
-   "public_folder": "not downloaded",
-   "status": "needs-Ian",
+   "public_folder": "usb-media/image",
+   "status": "done",
    "engine": "ComfyUI",
-   "notes": "Gated: Ian must accept the terms on Hugging Face while signed in and provide a read token.",
+   "notes": "On the WD media drive after the gated terms were accepted. ComfyUI pack of FLUX 3 Image Klein (distilled and base).",
    "context_native": null,
-   "license_note": "Custom BFL license; read before any commercial use (gated).",
+   "license_note": "FLUX Kommunity License: non-commercial use, with a commercial-output exception for Qualifying Users; read LICENSE.md before any commercial use.",
    "non_commercial": false,
-   "fit_note": null,
+   "fit_note": "Repo ships several quants and components; one pipeline is loaded at a time. Peak memory is not stated as a single figure on the card.",
    "gguf_params_b": null,
    "fit": {
     "m5x1": {
@@ -1733,25 +1733,25 @@
    "family": "LTX-2.5",
    "modality": "image/text-to-video",
    "kind": "media",
-   "params_total_b": null,
+   "params_total_b": 22.0,
    "params_active_b": null,
    "moe": false,
-   "params_note": "Gated repo: card not readable without accepting terms. Params unknown.",
+   "params_note": "File names identify a 22B transformer plus a Gemma 4 12B text encoder. Repo ships dev and distilled checkpoints in several quants, VAEs and upscalers. One pipeline is loaded at a time, so peak memory is well below the pack size.",
    "params_source": "https://huggingface.co/Lightricks/LTX-2.5",
-   "quant_format": "unknown (gated)",
-   "size_bytes": 200854145597,
+   "quant_format": "safetensors (ComfyUI pack: BF16, int8, NVFP4)",
+   "size_bytes": 200853702264,
    "size_gib": 187.06,
-   "resident_bytes": 200854145597,
+   "resident_bytes": 200853702264,
    "license": "ltx-2.x-community-license-agreement",
    "abliterated": false,
-   "public_folder": "not downloaded",
-   "status": "needs-Ian",
+   "public_folder": "usb-media/video",
+   "status": "done",
    "engine": "ComfyUI",
-   "notes": "Gated: Ian must accept the terms on Hugging Face while signed in and provide a read token.",
+   "notes": "On the WD media drive after the gated terms were accepted. ComfyUI pack of LTX-2.5.",
    "context_native": null,
-   "license_note": "Custom Lightricks community license; read before commercial use (gated).",
+   "license_note": "Custom Lightricks LTX 2.x community license; read before commercial use.",
    "non_commercial": false,
-   "fit_note": null,
+   "fit_note": "Repo ships several quants and components; one pipeline is loaded at a time. Peak memory is not stated as a single figure on the card.",
    "gguf_params_b": null,
    "fit": {
     "m5x1": {
@@ -1840,7 +1840,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "pplx-computer-qwen38-27b-mlx",
@@ -1862,7 +1862,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "pplx-pii-masking-mlx",
@@ -1884,7 +1884,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "qwen36-35b-a3b-mlx-3bit",
@@ -1906,7 +1906,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "qwen38-27b-ud-q4kxl",
@@ -1928,7 +1928,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "bge-small-en-gguf",
@@ -1950,7 +1950,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "seedvr2-comfyui",
@@ -1976,7 +1976,7 @@
      "Mac mini (M4)",
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "ornith-15-9b-oq4e",
@@ -2002,7 +2002,7 @@
      "Mac mini (M4)",
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "depth-anything-v2-small",
@@ -2028,7 +2028,7 @@
      "Mac mini (M4)",
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "claude-tokenizer",
@@ -2054,7 +2054,7 @@
      "Mac mini (M4)",
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "bge-m3-mlx-8bit",
@@ -2080,7 +2080,7 @@
      "Mac mini (M4)",
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "gemma4-26b-a4b-mlx-4bit",
@@ -2102,7 +2102,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "flux-schnell-q8-local",
@@ -2124,7 +2124,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "yue2-3b-mlx-8bit",
@@ -2150,7 +2150,7 @@
      "Mac mini (M4)",
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "qwen38-27b-dflash2",
@@ -2172,7 +2172,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "dflash2-v2-gguf",
@@ -2194,7 +2194,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "qwen38-27b-tail-iq4xs",
@@ -2216,7 +2216,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "whisper-tiny-en",
@@ -2238,7 +2238,7 @@
     "macs": [
      "MacBook Pro (M4 Max)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "black-forest-labs/FLUX.1-dev",
@@ -2260,7 +2260,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "black-forest-labs/FLUX.1-schnell",
@@ -2282,7 +2282,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "mlx-community/Qwen3-TTS-12Hz-1.7B-CustomVoice-8bit",
@@ -2304,7 +2304,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-8bit",
@@ -2326,7 +2326,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "mlx-community/Qwen3.5-4B-MLX-4bit",
@@ -2348,7 +2348,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "mlx-community/Qwen3.5-2B-MLX-4bit",
@@ -2370,7 +2370,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "facebook/w2v-bert-2.0",
@@ -2392,7 +2392,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "neuphonic/neucodec",
@@ -2414,7 +2414,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "neuphonic/neutts-air-q4-gguf",
@@ -2436,7 +2436,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "google/embeddinggemma-2",
@@ -2458,7 +2458,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "laion/CLIP-ViT-B-32-laion2B-s34B-b79K",
@@ -2480,7 +2480,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "hexgrad/Kokoro-82M",
@@ -2502,7 +2502,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "mlx-community/Kokoro-82M-8bit",
@@ -2524,7 +2524,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "repo": "Systran/faster-whisper-base",
@@ -2546,7 +2546,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "gemma4-e4b-mlx-4bit",
@@ -2568,7 +2568,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "mellum21-12b-thinking-q4km",
@@ -2590,7 +2590,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "ollama-gemma4-e4b",
@@ -2612,7 +2612,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "ollama-qwen35-9b",
@@ -2634,7 +2634,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "ollama-qwen3-8b",
@@ -2656,7 +2656,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "ollama-gemma3-4b",
@@ -2678,7 +2678,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    },
    {
     "id": "ollama-qwen3-4b",
@@ -2700,7 +2700,7 @@
     "macs": [
      "Mac mini (M4)"
     ],
-    "backup_status": "copying"
+    "backup_status": "verified"
    }
   ],
   "total_unique_bytes": 277355009251

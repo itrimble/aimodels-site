@@ -7,3 +7,10 @@ Static site for aimodels.remnantsecurity.com: Remnant Security's local AI model 
 - Preview locally: `python3 -m http.server 8000` and open http://localhost:8000/
 
 Live at https://aimodels.remnantsecurity.com (GitHub Pages from `main`).
+
+To refresh the catalog from the NAS (run on the MacBook Pro, which can SSH to the NAS):
+
+    scripts/sync-catalog --ssh ian@192.168.12.66 --private-catalog /path/to/private/catalog.json --repo .
+
+That updates statuses and sizes, rebuilds the pages, and prints a diff. It does not commit or merge. See `scripts/README.md`.
+
