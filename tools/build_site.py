@@ -1,7 +1,15 @@
 import json, html, os, shutil
 C = json.load(open('data/catalog.json'))
 OUT = '.'
-shutil.rmtree(OUT, ignore_errors=True); os.makedirs(OUT+'/models'); os.makedirs(OUT+'/data')
+# Never rmtree the repo root (that would delete .git, CNAME, tools, and this script).
+if os.path.abspath(OUT) == os.path.abspath('.'):
+    shutil.rmtree(os.path.join(OUT, 'models'), ignore_errors=True)
+    os.makedirs(OUT+'/models', exist_ok=True)
+    os.makedirs(OUT+'/data', exist_ok=True)
+else:
+    shutil.rmtree(OUT, ignore_errors=True)
+    os.makedirs(OUT+'/models')
+    os.makedirs(OUT+'/data')
 E = html.escape
 FLEET = C['fleet']; MODELS = C['models']; IDS = [f['id'] for f in FLEET]
 VLABEL = {"fits":"Fits","offload":"Tight / offload","convert":"Quantize first","after-RAM-upgrade":"After 128 GB RAM","no":"No","unknown":"Unknown"}
@@ -122,11 +130,17 @@ def ondevice_section():
     cards = "".join(f'<div class="card"><div class="k">{E(m)}</div><div class="v">{n}</div><div class="small mut">models, {b/1e9:.0f} GB</div></div>' for m,(n,b) in per.items())
     st = {s: sum(1 for i in ODI if i['backup_status']==s) for s in BKP}
     stline = "; ".join(f"{BKP[s]}: {n}" for s,n in st.items() if n)
+    if ODI and all(i['backup_status']=='verified' for i in ODI):
+        copy_sentence = "Each one was copied once to the NAS's WD drive (a model on both Macs is stored a single time) and the copy has been verified."
+    elif any(i.get('backup_status')=='copying' for i in ODI):
+        copy_sentence = "Each one is being copied once to the NAS's WD drive, so a model on both Macs is backed up a single time."
+    else:
+        copy_sentence = "Each one is copied once to the NAS's WD drive, so a model on both Macs is backed up a single time."
     remote = "".join(f"<li><b>{E(r['name'])}</b> on the {E(r['machine'])}: {E(r['note'])}.</li>" for r in OD.get('remote_only',[]))
     nos = "".join(f"<li>{E(r['machine'])}: {E(r['why'])}.</li>" for r in OD.get('not_scanned',[]))
     nw = "".join(f"<li>{E(x)}</li>" for x in OD.get('no_weights',[]))
     return f"""<h2 id="on-device">On-device (Mac) models</h2>
-<p class="lead">Models already sitting on the MacBook Pro and the Mac mini, scanned {E(OD['generated'])}. {len(ODI)} unique models, {OD['total_unique_bytes']/1e9:.0f} GB. Each one is being copied once to the NAS's WD drive, so a model on both Macs is backed up a single time. Backup status: {stline}.</p>
+<p class="lead">Models already sitting on the MacBook Pro and the Mac mini, scanned {E(OD['generated'])}. {len(ODI)} unique models, {OD['total_unique_bytes']/1e9:.0f} GB. {copy_sentence} Backup status: {stline}.</p>
 <div class="cards">{cards}<div class="card"><div class="k">Unique total</div><div class="v">{OD['total_unique_bytes']/1e9:.0f} GB</div><div class="small mut">duplicates counted once</div></div></div>
 <div class="wrap"><table><tr><th>Model</th><th>Use</th><th>Format</th><th>Size</th><th>On</th><th>License</th><th>NAS backup</th></tr>{odrows(ODI)}</table></div>
 <p class="small mut">Sizes are measured on the Macs in decimal GB. Licenses come from the Hugging Face card metadata, the GGUF file's own metadata, or the Ollama license layer, as noted under each one; "unknown" means no source states it. Full local and NAS paths are kept in the private catalog, not on this site.</p>
@@ -141,7 +155,15 @@ for m in MODELS:
 <td><a href="models/{m['id']}.html">{E(m['family'])}</a><div class="small mut">{E(m['repo'])}</div></td><td>{E(m['modality'])}</td><td>{E(m['quant_format'])}</td><td>{params(m)}</td><td>{m['size_gib']} GiB</td><td>{mem(m)}</td>
 <td>{E(m['license'])}{' <span class="b nc">non-commercial</span>' if m['non_commercial'] else ''}</td><td>{'<span class="b abl">abliterated</span>' if m['abliterated'] else 'no'}</td><td>{badge(m['status'])}</td><td>{badge(m['fit']['m5x1']['verdict'])}</td><td>{badge(m['fit']['m5x2']['verdict'])}</td></tr>"""
 opts=lambda vals: "".join(f"<option>{E(v)}</option>" for v in sorted(set(vals)))
-body=f"""<h1>Full catalog</h1><p class="lead">All {len(MODELS)} builds, including ones still downloading and two gated repos waiting on a Hugging Face sign-in. Filter by modality, license, abliteration, or which machine it fits.</p>
+n_prog = sum(1 for m in MODELS if m['status']=='in-progress')
+n_queue = sum(1 for m in MODELS if m['status']=='queued')
+n_gated = sum(1 for m in MODELS if m['status']=='needs-Ian')
+_bits = []
+if n_prog: _bits.append(f"{n_prog} still downloading")
+if n_queue: _bits.append(f"{n_queue} queued")
+if n_gated: _bits.append(f"{n_gated} gated repo{'s' if n_gated!=1 else ''} waiting on a Hugging Face sign-in")
+catalog_lead = ("Including " + ", and ".join(_bits) + ". ") if _bits else "Every listed build is on the NAS. "
+body=f"""<h1>Full catalog</h1><p class="lead">All {len(MODELS)} builds. {catalog_lead}Filter by modality, license, abliteration, or which machine it fits.</p>
 <div class="filters"><input id="q" placeholder="Search"><select id="mod"><option value="">All modalities</option>{opts(m['modality'] for m in MODELS)}</select>
 <select id="lic"><option value="">All licenses</option>{opts(m['license'] for m in MODELS)}<option value="__nc">Non-commercial only</option></select>
 <select id="abl"><option value="">Abliterated: any</option><option value="yes">Abliterated only</option><option value="no">Not abliterated</option></select>
