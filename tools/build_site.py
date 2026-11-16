@@ -388,17 +388,13 @@ body=f"""<h1>Licenses and responsibility</h1><p class="lead">License names come 
 <h2>Every model</h2><div class="wrap"><table><tr><th>Model</th><th>License</th><th>Summary</th></tr>{lr}</table></div>"""
 page("licenses.html","Licenses",body)
 
-open(OUT+'/CNAME','w').write("aimodels.remnantsecurity.com\n")
+# Do not rewrite CNAME or README on each build: CNAME is the custom domain
+# file (leave the existing bytes alone) and README is hand-maintained
+# (it documents scripts/sync-catalog).
+if not os.path.exists(OUT+'/CNAME'):
+    open(OUT+'/CNAME','w').write("aimodels.remnantsecurity.com\n")
 open(OUT+'/robots.txt','w').write("User-agent: *\nAllow: /\n")
-open(OUT+'/.nojekyll','w').write("")
-open(OUT+'/README.md','w').write("""# aimodels-site
+if not os.path.exists(OUT+'/.nojekyll'):
+    open(OUT+'/.nojekyll','w').write("")
 
-Static site for aimodels.remnantsecurity.com: Remnant Security's local AI model archive, fleet fit matrix, recipes and use cases.
-
-- Plain HTML/CSS/JS, no build step needed to serve. `CNAME` follows the other Remnant `*-site` repos (GitHub Pages).
-- Generated from `data/catalog.json` by `tools/build_site.py`. Facts come from Hugging Face model cards; memory and token/s figures are labelled estimates.
-- Preview locally: `python3 -m http.server 8000` and open http://localhost:8000/
-
-Live at https://aimodels.remnantsecurity.com (GitHub Pages from `main`).
-""")
 print("pages:", sum(len(f) for _,_,f in os.walk(OUT)))
