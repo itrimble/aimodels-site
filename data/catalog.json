@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-16 15:14:50 CST",
+ "generated": "2026-11-17 15:04:35 CST",
  "method": {
   "memory": "Estimated memory = resident weight bytes x 1.05 + 4 GB (runtime + about 32K tokens of KV cache) for LLMs; media = files + 4 GB, an upper bound since ComfyUI/Diffusers offload components. Estimates, not measurements.",
   "tok_s": "Token/s = memory bandwidth / (active params x bits-per-weight / 8). Bits-per-weight = GGUF bytes x 8 / GGUF parameter count. This is a theoretical ceiling for generation; real numbers are usually well below it. Two-box figures take off 18% for RPC only when the model does not fit one box (otherwise run it on one box). Not given where active params are unknown or the model needs conversion.",
@@ -1545,6 +1545,66 @@
    },
    "est_memory_gb": 31.2,
    "id": "moss-image-base-safetensors"
+  },
+  {
+   "repo": "mossloras/moss-image-lora-archive",
+   "hf_url": "https://huggingface.co/mossloras/moss-image-lora-archive",
+   "publisher": "mossloras",
+   "family": "MOSS-Image LoRA archive",
+   "modality": "text-to-image LoRA archive",
+   "kind": "media",
+   "params_total_b": null,
+   "params_active_b": null,
+   "moe": false,
+   "params_note": "Not a single model: an archive of many MOSS-Image LoRA adapters (3,197 safetensors, plus manifest and a few other files). Param counts vary per LoRA and are not stated on a card.",
+   "params_source": "https://huggingface.co/mossloras/moss-image-lora-archive",
+   "quant_format": "safetensors (LoRA archive)",
+   "size_bytes": 469562201899,
+   "size_gib": 437.31,
+   "resident_bytes": 469562201899,
+   "license": "unknown",
+   "abliterated": false,
+   "public_folder": "usb-media/image",
+   "status": "done",
+   "engine": "ComfyUI (MOSS-Image LoRAs)",
+   "notes": "On the WD USB media drive under 2026-11-hf-media/image. Image LoRA archive with no model card or license on the Hugging Face repo; appears to be re-uploaded Civitai LoRAs. One LoRA is loaded at a time, so peak memory is well below the archive size.",
+   "context_native": null,
+   "license_note": "No model card or license on the Hugging Face repo. The archive appears to be re-uploaded Civitai LoRAs; check each source model's license before use.",
+   "non_commercial": false,
+   "fit_note": "Archive of many LoRAs; one is loaded at a time. Peak memory is not stated as a single figure on a card.",
+   "gguf_params_b": null,
+   "fit": {
+    "m5x1": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "est_memory_gb": null,
+   "id": "moss-image-lora-archive-safetensors"
   },
   {
    "repo": "Wan-AI/Wan2.2-T2V-A14B",
