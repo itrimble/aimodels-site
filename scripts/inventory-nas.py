@@ -139,6 +139,7 @@ def main() -> None:
     folders += area_children("official", ARCH / "official")
     folders += area_children("abliterated", ARCH / "abliterated")
     folders += area_children("media", ARCH / "media")
+    folders += area_children("extras", ARCH / "extras")
     folders += area_children("usb-media/image", WD / "image")
     folders += area_children("usb-media/video", WD / "video")
     folders += area_children("usb-media/audio", WD / "audio")

@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-17 15:04:35 CST",
+ "generated": "2026-11-21 16:12:59 CST",
  "method": {
   "memory": "Estimated memory = resident weight bytes x 1.05 + 4 GB (runtime + about 32K tokens of KV cache) for LLMs; media = files + 4 GB, an upper bound since ComfyUI/Diffusers offload components. Estimates, not measurements.",
   "tok_s": "Token/s = memory bandwidth / (active params x bits-per-weight / 8). Bits-per-weight = GGUF bytes x 8 / GGUF parameter count. This is a theoretical ceiling for generation; real numbers are usually well below it. Two-box figures take off 18% for RPC only when the model does not fit one box (otherwise run it on one box). Not given where active params are unknown or the model needs conversion.",
@@ -1905,6 +1905,546 @@
    },
    "est_memory_gb": null,
    "id": "ltx-2-5-unknown"
+  },
+  {
+   "repo": "google/embeddinggemma-2",
+   "hf_url": "https://huggingface.co/google/embeddinggemma-2",
+   "publisher": "Google",
+   "family": "EmbeddingGemma 2",
+   "modality": "embeddings",
+   "kind": "extra",
+   "params_note": "Parameter count not stated on the card; the archive copy is 1.5 GB. Text embedding model for sentence-transformers.",
+   "quant_format": "safetensors (Sentence Transformers)",
+   "size_bytes": 1521119809,
+   "license": "apache-2.0",
+   "engine": "sentence-transformers",
+   "notes": "Text embedding model for RAG/Open WebUI, copied from the Mac mini backup into archive/extras.",
+   "license_note": "Apache 2.0: commercial OK.",
+   "id": "embeddinggemma-2",
+   "size_gib": 1.42,
+   "resident_bytes": 1521119809,
+   "abliterated": false,
+   "status": "done",
+   "public_folder": "extras",
+   "params_total_b": null,
+   "params_active_b": null,
+   "moe": false,
+   "context_native": null,
+   "non_commercial": false,
+   "gguf_params_b": null,
+   "fit_note": null,
+   "est_memory_gb": 5.5,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "params_source": "https://huggingface.co/google/embeddinggemma-2"
+  },
+  {
+   "repo": "hexgrad/Kokoro-82M",
+   "hf_url": "https://huggingface.co/hexgrad/Kokoro-82M",
+   "publisher": "hexgrad",
+   "family": "Kokoro 82M",
+   "modality": "text-to-speech",
+   "kind": "extra",
+   "params_total_b": 0.082,
+   "params_note": "82M TTS model (card); PyTorch .pth. The Kokoro-TTS-Local project provides the pipeline.",
+   "quant_format": "PyTorch .pth",
+   "size_bytes": 327738002,
+   "license": "apache-2.0",
+   "engine": "Kokoro-TTS-Local",
+   "notes": "Fast TTS; code is the Kokoro-TTS-Local project. Copied from the Mac mini backup into archive/extras.",
+   "license_note": "Apache 2.0: commercial OK.",
+   "id": "kokoro-82m",
+   "size_gib": 0.31,
+   "resident_bytes": 327738002,
+   "abliterated": false,
+   "status": "done",
+   "public_folder": "extras",
+   "params_active_b": null,
+   "moe": false,
+   "context_native": null,
+   "non_commercial": false,
+   "gguf_params_b": null,
+   "fit_note": null,
+   "est_memory_gb": 4.3,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "params_source": "https://huggingface.co/hexgrad/Kokoro-82M"
+  },
+  {
+   "repo": "Tongyi-MAI/Z-Image-Turbo",
+   "hf_url": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
+   "publisher": "Tongyi-MAI",
+   "family": "Z-Image Turbo",
+   "modality": "text-to-image",
+   "kind": "extra",
+   "params_note": "Parameter count not stated on the card; Diffusers layout is 32.8 GB.",
+   "quant_format": "safetensors (Diffusers)",
+   "size_bytes": 32848305533,
+   "license": "apache-2.0",
+   "engine": "Diffusers",
+   "notes": "Fast image generation. The Mac backup was weights-only; added model_index.json and scheduler config.",
+   "license_note": "Apache 2.0: commercial OK.",
+   "fit_note": "One pipeline at a time; ~33 GB of weights.",
+   "id": "z-image-turbo",
+   "size_gib": 30.59,
+   "resident_bytes": 32848305533,
+   "abliterated": false,
+   "status": "done",
+   "public_folder": "extras",
+   "params_total_b": null,
+   "params_active_b": null,
+   "moe": false,
+   "context_native": null,
+   "non_commercial": false,
+   "gguf_params_b": null,
+   "est_memory_gb": 36.8,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "params_source": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo"
+  },
+  {
+   "repo": "black-forest-labs/FLUX.1-schnell",
+   "hf_url": "https://huggingface.co/black-forest-labs/FLUX.1-schnell",
+   "publisher": "Black Forest Labs",
+   "family": "FLUX.1 schnell",
+   "modality": "text-to-image",
+   "kind": "extra",
+   "params_total_b": 12.0,
+   "params_note": "12B rectified-flow transformer (card); Diffusers layout is 33.7 GB.",
+   "quant_format": "safetensors (Diffusers)",
+   "size_bytes": 33725923002,
+   "license": "apache-2.0",
+   "engine": "Diffusers",
+   "notes": "Fast 4-step image model. Gated repo; weights came from the Mac backup, missing index and scheduler added.",
+   "license_note": "Apache 2.0: commercial OK.",
+   "fit_note": "One pipeline at a time; ~34 GB of weights.",
+   "id": "flux1-schnell",
+   "size_gib": 31.41,
+   "resident_bytes": 33725923002,
+   "abliterated": false,
+   "status": "done",
+   "public_folder": "extras",
+   "params_active_b": null,
+   "moe": false,
+   "context_native": null,
+   "non_commercial": false,
+   "gguf_params_b": null,
+   "est_memory_gb": 37.7,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "params_source": "https://huggingface.co/black-forest-labs/FLUX.1-schnell"
+  },
+  {
+   "repo": "numz/SeedVR2_comfyUI",
+   "hf_url": "https://huggingface.co/numz/SeedVR2_comfyUI",
+   "publisher": "numz",
+   "family": "SeedVR2",
+   "modality": "video/image upscaling",
+   "kind": "extra",
+   "params_total_b": 3.0,
+   "params_note": "3B fp16 upscaler plus VAE (card).",
+   "quant_format": "safetensors (fp16)",
+   "size_bytes": 7284343622,
+   "license": "apache-2.0",
+   "engine": "ComfyUI",
+   "notes": "Image/video upscaling and restoration; two safetensors from the Mac backup.",
+   "license_note": "Apache 2.0: commercial OK.",
+   "id": "seedvr2-comfyui",
+   "size_gib": 6.78,
+   "resident_bytes": 7284343622,
+   "abliterated": false,
+   "status": "done",
+   "public_folder": "extras",
+   "params_active_b": null,
+   "moe": false,
+   "context_native": null,
+   "non_commercial": false,
+   "gguf_params_b": null,
+   "fit_note": null,
+   "est_memory_gb": 11.3,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "offload",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "params_source": "https://huggingface.co/numz/SeedVR2_comfyUI"
+  },
+  {
+   "repo": "JetBrains/Mellum2-12B-A2.5B-Base",
+   "hf_url": "https://huggingface.co/JetBrains/Mellum2-12B-A2.5B-Base",
+   "publisher": "JetBrains",
+   "family": "Mellum2.1 12B-A2.5B Thinking",
+   "modality": "text LLM (code)",
+   "kind": "extra",
+   "params_total_b": 12.0,
+   "params_active_b": 2.5,
+   "moe": true,
+   "gguf_params_b": 12.0,
+   "params_note": "12B total / 2.5B active MoE (GGUF metadata); thinking variant.",
+   "quant_format": "GGUF (Q4_K_M)",
+   "size_bytes": 8071295264,
+   "license": "apache-2.0",
+   "engine": "llama.cpp",
+   "notes": "Small, fast coding sidecar; local GGUF from the Mac mini backup into archive/extras.",
+   "license_note": "Apache 2.0: commercial OK.",
+   "id": "mellum21-12b-a2.5b-thinking-q4km",
+   "size_gib": 7.52,
+   "resident_bytes": 8071295264,
+   "abliterated": false,
+   "status": "done",
+   "public_folder": "extras",
+   "context_native": null,
+   "non_commercial": false,
+   "fit_note": null,
+   "est_memory_gb": 12.5,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": 127.9
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": 127.9
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": 243.8
+    },
+    "mini": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "params_source": "https://huggingface.co/JetBrains/Mellum2-12B-A2.5B-Base"
+  },
+  {
+   "repo": "neuphonic/neutts-air-q4-gguf",
+   "hf_url": "https://huggingface.co/neuphonic/neutts-air-q4-gguf",
+   "publisher": "Neuphonic",
+   "family": "NeuTTS Air Q4",
+   "modality": "text-to-speech",
+   "kind": "extra",
+   "params_note": "Tiny GGUF TTS; parameter count not stated on the card.",
+   "quant_format": "GGUF (Q4_0)",
+   "size_bytes": 527054304,
+   "license": "apache-2.0",
+   "engine": "llama.cpp / NeuTTS",
+   "notes": "Light TTS fallback; copied from the Mac mini backup.",
+   "license_note": "Apache 2.0: commercial OK.",
+   "id": "neutts-air-q4",
+   "size_gib": 0.49,
+   "resident_bytes": 527054304,
+   "abliterated": false,
+   "status": "done",
+   "public_folder": "extras",
+   "params_total_b": null,
+   "params_active_b": null,
+   "moe": false,
+   "context_native": null,
+   "non_commercial": false,
+   "gguf_params_b": null,
+   "fit_note": null,
+   "est_memory_gb": 4.5,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "params_source": "https://huggingface.co/neuphonic/neutts-air-q4-gguf"
+  },
+  {
+   "repo": "unsloth/bge-small-en-v1.5-GGUF",
+   "hf_url": "https://huggingface.co/unsloth/bge-small-en-v1.5-GGUF",
+   "publisher": "Unsloth (BAAI base)",
+   "family": "bge-small-en v1.5",
+   "modality": "embeddings",
+   "kind": "extra",
+   "params_total_b": 0.033,
+   "params_note": "33M English embedding model (card); f16 GGUF.",
+   "quant_format": "GGUF (f16)",
+   "size_bytes": 67582560,
+   "license": "mit",
+   "engine": "llama.cpp embeddings",
+   "notes": "Tiny embedding model for quick document search; copied from the MacBook Pro backup.",
+   "license_note": "MIT: commercial OK.",
+   "id": "bge-small-en-v1.5-gguf",
+   "size_gib": 0.06,
+   "resident_bytes": 67582560,
+   "abliterated": false,
+   "status": "done",
+   "public_folder": "extras",
+   "params_active_b": null,
+   "moe": false,
+   "context_native": null,
+   "non_commercial": false,
+   "gguf_params_b": null,
+   "fit_note": null,
+   "est_memory_gb": 4.1,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "params_source": "https://huggingface.co/unsloth/bge-small-en-v1.5-GGUF"
+  },
+  {
+   "repo": "local/qwen-image-2.1-q4-k-m",
+   "hf_url": "https://huggingface.co/Qwen/Qwen-Image-2.1",
+   "publisher": "Qwen / community quant",
+   "family": "Qwen-Image 2.1 Q4_K_M",
+   "modality": "text-to-image",
+   "kind": "extra",
+   "params_total_b": 7.1,
+   "params_note": "7.1B visual generation component (official card); community Q4_K_M GGUF.",
+   "quant_format": "GGUF (Q4_K_M, community quant)",
+   "size_bytes": 4604557984,
+   "license": "qwen-research",
+   "engine": "ComfyUI-GGUF",
+   "notes": "Community 4.6 GB quant copied from the NAS llms share; provenance and \"uncensored\" label not verified.",
+   "license_note": "Qwen Research License: non-commercial.",
+   "non_commercial": true,
+   "fit_note": "Single 4.6 GB GGUF; one pipeline at a time.",
+   "id": "qwen-image-2-1-q4km-gguf",
+   "size_gib": 4.29,
+   "resident_bytes": 4604557984,
+   "abliterated": false,
+   "status": "done",
+   "public_folder": "extras",
+   "params_active_b": null,
+   "moe": false,
+   "context_native": null,
+   "gguf_params_b": null,
+   "est_memory_gb": 8.6,
+   "fit": {
+    "m5x1": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "m5x2": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mbp": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "mini": {
+     "verdict": "fits",
+     "est_tok_s": null
+    },
+    "omarchy": {
+     "verdict": "after-RAM-upgrade",
+     "est_tok_s": null
+    },
+    "nas": {
+     "verdict": "no",
+     "est_tok_s": null
+    },
+    "neo": {
+     "verdict": "unknown",
+     "est_tok_s": null
+    }
+   },
+   "params_source": "https://huggingface.co/Qwen/Qwen-Image-2.1"
   }
  ],
  "on_device": {

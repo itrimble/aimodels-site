@@ -101,7 +101,7 @@ def m5rows(ids):
         r+=f"<tr><td><a href='models/{m['id']}.html'>{E(m['family'])}</a><div class='small mut'>{E(m['quant_format'])}</div></td><td>{'yes' if m['abliterated'] else 'no'}</td><td>{mem(m)}</td>"+"".join(f"<td>{fitcell(m,i)}</td>" for i in ids)+"</tr>"
     return r
 body = f"""<h1>Every model we keep, and where it runs.</h1>
-<p class="lead">Remnant Security's local AI archive: {len(MODELS)} model builds across text, vision, speech, music, image and video, about {tot_gib/1024:.1f} TiB on disk. For each one: what it is, its license, how much memory it needs, and whether it runs on our machines, including the planned Bosgame M5 boxes, one or two of them.</p>
+<p class="lead">Remnant Security's local AI archive: {len(MODELS)} model builds across text, vision, speech, music, image, video and embeddings, about {tot_gib/1024:.1f} TiB on disk. For each one: what it is, its license, how much memory it needs, and whether it runs on our machines, including the planned Bosgame M5 boxes, one or two of them.</p>
 <div class="cards">
 <div class="card"><div class="k">Downloaded</div><div class="v">{cnt['done']}</div></div>
 <div class="card"><div class="k">Downloading now</div><div class="v">{cnt['in-progress']}</div></div>
@@ -117,7 +117,8 @@ body = f"""<h1>Every model we keep, and where it runs.</h1>
 <li><b>Two M5s add</b> the Flash-Next Q4_K_XL abliterated build and DeepSeek V4.1 Flash at IQ1_M (ISTA-DASLab build; the 110 GB Engram table stays memory-mapped on SSD).</li>
 <li><b>Not even two M5s</b> hold the huihui DeepSeek IQ1_M build fully resident (~268 GB est.) or any original safetensors weights; those are archive copies to quantize from.</li>
 <li><b>The MacBook Pro (36 GB)</b> runs Qwen3.8-27B at Q4 or the 2.4-bit Mirai build, plus all speech and music models.</li>
-<li><b>Video</b>: Wan 2.2 A14B needs the card's offload flags even on an M5; HunyuanVideo 1.5 (8.3B) is the lighter video option.</li></ul>
+<li><b>Video</b>: Wan 2.2 A14B needs the card's offload flags even on an M5; HunyuanVideo 1.5 (8.3B) is the lighter video option.</li>
+<li><b>Extras</b>: EmbeddingGemma 2 or bge-small for private RAG, Kokoro and NeuTTS for speech, Z-Image Turbo and FLUX.1 schnell for images, SeedVR2 for upscaling, Mellum2.1 for a fast coding sidecar.</li></ul>
 <p class="note">Two engines matter: alesha-pro's Mirai and Maya builds need their own forked engines (mainline llama.cpp, LM Studio and Ollama will not load them), and Maya/Strata builds can't be split across two boxes with llama.cpp RPC.</p>"""
 page("index.html","Overview",body)
 
@@ -364,15 +365,40 @@ EOF</code></pre>
   -e OPENAI_API_BASE_URL=http://host.docker.internal:8080/v1 -e OPENAI_API_KEY=none \\
   --add-host=host.docker.internal:host-gateway \\
   -v open-webui:/app/backend/data ghcr.io/open-webui/open-webui:main</code></pre>"""
+extras_recipe = """<h2 id="extras">Extras: embeddings, TTS, image and a coding sidecar</h2>
+<p>The nine extras live under <code>/models/extras/</code> on the M5. They are small sidecars, not replacements for the main LLMs.</p>
+<h3 id="embeddings">EmbeddingGemma 2 / bge-small</h3>
+<pre><code>pip install -U sentence-transformers
+python - &lt;&lt;'EOF'
+from sentence_transformers import SentenceTransformer
+m = SentenceTransformer("/models/extras/embeddinggemma-2")
+print(m.encode(["local models stay local"]).shape)
+EOF</code></pre>
+<p><code>bge-small-en-v1.5-f16.gguf</code> is the tiny llama.cpp embedding alternative: <code>llama-server -m /models/extras/bge-small-en-v1.5-gguf/bge-small-en-v1.5-f16.gguf --embedding --port 8082</code>.</p>
+<h3 id="extras-tts">Kokoro 82M / NeuTTS Air</h3>
+<p>Kokoro is the fast TTS model; use the <code>Kokoro-TTS-Local</code> project against <code>/models/extras/kokoro-82m</code>. NeuTTS Air is a single 0.5 GB GGUF fallback.</p>
+<h3 id="extras-image">Z-Image Turbo / FLUX.1 schnell</h3>
+<pre><code>import torch
+from diffusers import AutoPipelineForText2Image
+pipe = AutoPipelineForText2Image.from_pretrained("/models/extras/z-image-turbo", torch_dtype=torch.bfloat16)
+pipe.enable_model_cpu_offload()
+img = pipe("isometric illustration of a home lab rack").images[0]</code></pre>
+<p>FLUX.1 schnell uses <code>FluxPipeline.from_pretrained("/models/extras/flux1-schnell")</code> and four steps. SeedVR2 is a ComfyUI upscaler; the Qwen-Image Q4_K_M GGUF is a ComfyUI-GGUF asset.</p>
+<h3 id="extras-code">Mellum2.1 12B-A2.5B</h3>
+<pre><code>llama-server -m /models/extras/mellum21-12b-a2.5b-thinking-q4km/Mellum2.1-12B-A2.5B-Thinking-Q4_K_M.gguf \
+  -ngl 99 -c 32768 --jinja --port 8081</code></pre>
+<p class="small mut">The extras are staged files, not benchmarks. Check each tool's <code>--help</code>; Z-Image and FLUX need a recent Diffusers or ComfyUI, SeedVR2 needs its ComfyUI node, and the GGUF extras use the same llama.cpp build as the main models.</p>"""
+body += extras_recipe
 page("recipes.html","Recipes",body)
 
 # ---------- use cases
 UC = [
  ("Security research and red-team prep","GLM-5.3-Flash or Flash-Next on one M5; abliterated builds when a stock model refuses legitimate defensive questions (malware triage, exploit write-ups for patched CVEs, phishing-awareness samples).","M5 ×1 (Flash-Next IQ4_XS / alesha IQ3_S), M5 ×2 for DeepSeek V4.1 IQ1_M","Keep abliterated models offline and off public endpoints. Authorised targets only."),
- ("Local coding agent","Serve Flash-Next IQ4_XS with llama-server and point an OpenAI-compatible coding agent at it. Only 6B params are active per token, so it is the fastest large model here (theoretical ceiling ≈67 tok/s on one M5). Qwen3.8-27B Q4 on the MacBook Pro for travel.","M5 ×1, MacBook Pro","Code never leaves the LAN. Qwen Community License allows internal commercial use."),
- ("Private document Q&A","Open WebUI + llama-server + your own documents. Long native context (262K on Qwen3.8, 1M advertised on GLM-5.3/DeepSeek V4.1) helps, but KV cache grows with context; start at 32K.","M5 ×1","Client documents stay on hardware you own."),
- ("Content for Remnant apps","Qwen-Image 2.1 / MOSS-Image for concept art, Wan 2.2 or HunyuanVideo for short clips, ACE-Step for background music on SnapDog/CyberSim promos.","M5 ×1 (image/music), M5 with offload (Wan)","Check licenses: Qwen-Image 2.1 and YuE2 are non-commercial; MOSS-Image (Apache 2.0), Wan 2.2 (Apache 2.0) and ACE-Step (MIT) are commercial-OK."),
- ("Voice: transcripts, narration, voice notes","Whisper turbo for meeting/podcast transcripts; Qwen3-TTS (Apache 2.0) for narration with your own cloned voice; Fish S2 Pro for research comparisons only.","Every machine except the NAS for TTS; Whisper even runs on the Mac mini","Only clone voices with consent."),
+ ("Local coding agent","Serve Flash-Next IQ4_XS with llama-server and point an OpenAI-compatible coding agent at it. Only 6B params are active per token, so it is the fastest large model here (theoretical ceiling ≈67 tok/s on one M5). Mellum2.1 12B-A2.5B is the small, fast sidecar; Qwen3.8-27B Q4 is the MacBook Pro travel model.","M5 ×1, MacBook Pro","Code never leaves the LAN. Qwen Community License allows internal commercial use."),
+ ("Private document Q&A","Open WebUI + llama-server + your own documents, with EmbeddingGemma 2 or bge-small building the local index. Long native context (262K on Qwen3.8, 1M advertised on GLM-5.3/DeepSeek V4.1) helps, but KV cache grows with context; start at 32K.","M5 ×1, MacBook Pro","Client documents and embeddings stay on hardware you own."),
+ ("Local RAG and search","EmbeddingGemma 2 (1.5 GB) or bge-small (0.07 GB) builds a private index; pair it with Flash-Next or Qwen3.8-27B for answers. No text leaves the LAN.","M5 ×1, MacBook Pro","Embeddings and prompts stay local. No third-party embedding API."),
+ ("Content for Remnant apps","Z-Image Turbo or FLUX.1 schnell for fast concept art, Qwen-Image 2.1 / MOSS-Image for heavier work, SeedVR2 for upscaling, Wan 2.2 or HunyuanVideo for clips, ACE-Step for background music.","M5 ×1 (image/music), M5 with offload (Wan)","Check licenses: Qwen-Image 2.1, the Qwen-Image Q4_K_M GGUF and YuE2 are non-commercial; Z-Image, FLUX.1 schnell, MOSS-Image, Wan 2.2 and ACE-Step are commercial-OK."),
+ ("Voice: transcripts, narration, voice notes","Whisper turbo for meeting/podcast transcripts; Kokoro 82M or NeuTTS Air for fast lightweight speech; Qwen3-TTS (Apache 2.0) for narration with your own cloned voice; Fish S2 Pro for research comparisons only.","Every machine except the NAS for TTS; Whisper even runs on the Mac mini","Only clone voices with consent."),
  ("Vision: screenshot and UI review","All four LLM families are image-text-to-text; load the mmproj file with llama-server to ask about App Store screenshots, error dialogs or diagrams.","M5 ×1, MacBook Pro (27B)","Use the mmproj that ships beside each GGUF."),
  ("Quantization lab","Original safetensors are archived so you can make your own GGUFs or try new quant methods (GSQ-RCO, Mirai) without re-downloading 1.2 TB.","Any box with disk; M5 to test results","Originals are the source of truth; keep the archive offline-safe."),
 ]

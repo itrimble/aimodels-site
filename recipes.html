@@ -129,4 +129,25 @@ EOF</code></pre>
 <pre><code>docker run -d --name open-webui -p 127.0.0.1:3000:8080 \
   -e OPENAI_API_BASE_URL=http://host.docker.internal:8080/v1 -e OPENAI_API_KEY=none \
   --add-host=host.docker.internal:host-gateway \
-  -v open-webui:/app/backend/data ghcr.io/open-webui/open-webui:main</code></pre></main><footer>Remnant Security · Local model archive notes. Facts come from each model's Hugging Face card; speed and memory figures are estimates and are labelled as such. Nothing here is a benchmark.</footer></body></html>
+  -v open-webui:/app/backend/data ghcr.io/open-webui/open-webui:main</code></pre><h2 id="extras">Extras: embeddings, TTS, image and a coding sidecar</h2>
+<p>The nine extras live under <code>/models/extras/</code> on the M5. They are small sidecars, not replacements for the main LLMs.</p>
+<h3 id="embeddings">EmbeddingGemma 2 / bge-small</h3>
+<pre><code>pip install -U sentence-transformers
+python - &lt;&lt;'EOF'
+from sentence_transformers import SentenceTransformer
+m = SentenceTransformer("/models/extras/embeddinggemma-2")
+print(m.encode(["local models stay local"]).shape)
+EOF</code></pre>
+<p><code>bge-small-en-v1.5-f16.gguf</code> is the tiny llama.cpp embedding alternative: <code>llama-server -m /models/extras/bge-small-en-v1.5-gguf/bge-small-en-v1.5-f16.gguf --embedding --port 8082</code>.</p>
+<h3 id="extras-tts">Kokoro 82M / NeuTTS Air</h3>
+<p>Kokoro is the fast TTS model; use the <code>Kokoro-TTS-Local</code> project against <code>/models/extras/kokoro-82m</code>. NeuTTS Air is a single 0.5 GB GGUF fallback.</p>
+<h3 id="extras-image">Z-Image Turbo / FLUX.1 schnell</h3>
+<pre><code>import torch
+from diffusers import AutoPipelineForText2Image
+pipe = AutoPipelineForText2Image.from_pretrained("/models/extras/z-image-turbo", torch_dtype=torch.bfloat16)
+pipe.enable_model_cpu_offload()
+img = pipe("isometric illustration of a home lab rack").images[0]</code></pre>
+<p>FLUX.1 schnell uses <code>FluxPipeline.from_pretrained("/models/extras/flux1-schnell")</code> and four steps. SeedVR2 is a ComfyUI upscaler; the Qwen-Image Q4_K_M GGUF is a ComfyUI-GGUF asset.</p>
+<h3 id="extras-code">Mellum2.1 12B-A2.5B</h3>
+<pre><code>llama-server -m /models/extras/mellum21-12b-a2.5b-thinking-q4km/Mellum2.1-12B-A2.5B-Thinking-Q4_K_M.gguf   -ngl 99 -c 32768 --jinja --port 8081</code></pre>
+<p class="small mut">The extras are staged files, not benchmarks. Check each tool's <code>--help</code>; Z-Image and FLUX need a recent Diffusers or ComfyUI, SeedVR2 needs its ComfyUI node, and the GGUF extras use the same llama.cpp build as the main models.</p></main><footer>Remnant Security · Local model archive notes. Facts come from each model's Hugging Face card; speed and memory figures are estimates and are labelled as such. Nothing here is a benchmark.</footer></body></html>

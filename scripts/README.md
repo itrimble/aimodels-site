@@ -6,6 +6,8 @@ The site itself is generated, public HTML. The private catalog (with NAS paths) 
 
 ## What the script does
 
+The inventory walker also scans `extras/` under the cold archive for the nine curated cross-platform extras (embeddings, TTS, image, upscaling and a coding sidecar).
+
 `scripts/sync-catalog` walks the NAS model folders, updates a private `catalog.json` (status, sizes, paths, on-device backup flag), writes a public `data/catalog.json` with paths stripped, rebuilds the static pages, and prints a diff.
 
 It does not commit, push, merge, open a pull request, install a scheduler, or store any credentials on the NAS.
