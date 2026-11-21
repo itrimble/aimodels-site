@@ -143,7 +143,7 @@ body = f"""<h1>Every model we keep, and where it runs.</h1>
 <div class="card"><div class="k">Last checked</div><div class="v">{last_checked}</div><div class="small mut">Mac scan {mac_scan}</div></div>
 </div>
 <p class="pipeline">{pipeline}</p>
-<p class="pipeline"><span class="b measured">measured</span> <a href="benchmarks.html">44.0 tok/s Flash-Next IQ3_S on 8060S</a> · <a href="benchmarks.html#measured">59.7 tok/s at 8K on Linux</a> · <a href="benchmarks.html#measured">18.3 tok/s GLM Maya-S</a>. Bosgame M5 pending.</p>
+<p class="pipeline"><span class="b measured">measured</span> <a href="benchmarks.html">Bosgame M5 pair: 70.7 tok/s code, 58.2 one-chat (StrixFold)</a> · <a href="benchmarks.html#measured">44.0 tok/s Flash-Next on 8060S</a> · <a href="benchmarks.html#measured">18.3 tok/s GLM Maya-S</a>. Our M5s pending.</p>
 <div class="start"><h2>Start here</h2><p>Three decisions cover most of the archive. The table below is the evidence; the catalog has every build and filter.</p>
 <div class="picks">
 <div class="pick"><span class="k">One M5</span><a href="models/qwen3-8-flash-next-gguf-ud-iq4-xs.html">Flash-Next IQ4_XS</a> or <a href="models/qwen3-8-flash-next-abliterated-gsq-rco-strata-gguf-gsq-rco.html">Strata IQ3_S</a><div class="small mut">~103 GB or ~93 GB; the fastest large model on one box.</div></div>
@@ -342,14 +342,15 @@ page("fleet.html","Fleet & fit",body.replace("{holds_html}", holds()))
 measured = BENCH['rows']
 pending = BENCH['pending']
 pending_html = "".join(f'<div class="pick"><span class="k">{E(p["machine"])}</span>{E(p["reason"])}</div>' for p in pending)
-body=f"""<h1>Benchmarks</h1><p class="lead">Measured generation and prompt speed, with the hardware and the source. These are not our benchmarks: they are the best published measurements on M5-class hardware, plus Windows, Linux and CUDA references. No Bosgame M5 has arrived yet.</p>
+body=f"""<h1>Benchmarks</h1><p class="lead">Measured generation and prompt speed, with the hardware and the source. These are not our benchmarks: they are the best published measurements on M5-class hardware, plus Windows, Linux and CUDA references. Our Bosgame M5s have not arrived yet; StrixFold’s third-party pair data is below.</p>
 <div class="cards stats">
 <div class="card"><div class="k">Measured rows</div><div class="v">{len(measured)}</div><div class="small mut">published sources</div></div>
-<div class="card"><div class="k">Closest hardware</div><div class="v">8060S</div><div class="small mut">Ryzen AI Max+ 395, 128 GB</div></div>
-<div class="card"><div class="k">Bosgame M5</div><div class="v">Pending</div><div class="small mut">delivery Monday; plan below</div></div>
+<div class="card"><div class="k">Bosgame M5 pair</div><div class="v">58.2</div><div class="small mut">tok/s, StrixFold one-chat</div></div>
+<div class="card"><div class="k">Our M5</div><div class="v">Pending</div><div class="small mut">delivery Monday; plan below</div></div>
 </div>
-<p class="note">The closest measured box is a <b>GMKtec NucBox EVO-X2</b> with the same Ryzen AI Max+ 395 and Radeon 8060S. It is not a Bosgame, and it is not our measurement. The site's token/s figures are theoretical ceilings; this page is the measured counterpart.</p>
+<p class="note"><b>StrixFold</b> measured two Bosgame M5 pairs and a pair of Ryzen AI Halo boxes over USB4. <b>TensorFold</b> measured a single Strix Halo on ROCm. None of these are our boxes; our M5s arrive Monday. The site's token/s figures are theoretical ceilings; this page is the measured counterpart.</p>
 <h2 id="measured">Measured</h2>
+<p><b>StrixFold</b> is the two-box HIP fork of TensorFold; the M5 pair rows are third-party measurements on actual Bosgame M5s. <b>TensorFold</b> rows are its ROCm benchmark receipts on a single Strix Halo.</p>
 <p class="small mut">Updated {E(BENCH['generated'])}. Generation is decode tokens per second; prompt read is prefill tokens per second; TTFT is time to first token. Context matters, so the context column is part of the result.</p>
 {bench_table(measured)}
 <p class="small mut">Method: {E(BENCH['method'])} Machine-readable: <a href="data/benchmarks.json">data/benchmarks.json</a>.</p>
