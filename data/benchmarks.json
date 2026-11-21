@@ -1,6 +1,6 @@
 {
  "generated": "2026-11-21",
- "method": "Measured results from published sources, not our own benchmarks. gen_tok_s is token generation speed; prompt_tok_s is prompt processing; ttft_s is time to first token. Context matters: a result at 4K is not a result at 128K.",
+ "method": "Measured results from published sources, not our own benchmarks. decode_tok_s is token generation speed; prefill_tok_s is prompt processing; ttft_s is time to first token. Context matters: a result at 4K is not a result at 128K. A missing prefill cell means the source did not report it, not that it is zero.",
  "rows": [
   {
    "id": "strata-win-iq3s",
@@ -11,12 +11,12 @@
    "os": "Windows 11 Pro",
    "engine": "Strata 0.2.7 / ROCm 10.2",
    "context": "short chat",
-   "gen_tok_s": 44.0,
-   "prompt_tok_s": 755,
    "ttft_s": 0.6,
    "kind": "measured",
    "source": "https://github.com/Niko1221/Strata/blob/HEAD/docs/STRIX_HALO_WINDOWS.md",
-   "note": "Third-party measurement on the closest M5-class box, not a Bosgame. 4K/16K/32K prompt reads were 755/821/792 tok/s; 4K TTFT 0.60 s."
+   "note": "Third-party measurement on the closest M5-class box, not a Bosgame. 4K/16K/32K prompt reads were 755/821/792 tok/s; 4K TTFT 0.60 s.",
+   "decode_tok_s": 44.0,
+   "prefill_tok_s": 755
   },
   {
    "id": "strata-win-code",
@@ -27,12 +27,12 @@
    "os": "Windows 11 Pro",
    "engine": "Strata 0.2.7 / ROCm 10.2",
    "context": "coding agent, 6 turns",
-   "gen_tok_s": 47.0,
-   "prompt_tok_s": null,
    "ttft_s": 4.5,
    "kind": "measured",
    "source": "https://github.com/Niko1221/Strata/blob/HEAD/docs/STRIX_HALO_WINDOWS.md",
-   "note": "69% of the prompt came from the conversation cache; 4.5 s to first token per turn."
+   "note": "69% of the prompt came from the conversation cache; 4.5 s to first token per turn.",
+   "decode_tok_s": 47.0,
+   "prefill_tok_s": null
   },
   {
    "id": "strata-linux-8k",
@@ -43,12 +43,12 @@
    "os": "Linux",
    "engine": "Strata 0.2.x",
    "context": "8K",
-   "gen_tok_s": 59.7,
-   "prompt_tok_s": null,
    "ttft_s": null,
    "kind": "measured",
    "source": "https://github.com/Niko1221/Strata/blob/HEAD/docs/STRIX_HALO.md",
-   "note": "Tuned switches. The same page measured 56.2 tok/s at 8K with defaults and 40.6-42.8 tok/s at 128K."
+   "note": "Tuned switches. The same page measured 56.2 tok/s at 8K with defaults and 40.6-42.8 tok/s at 128K.",
+   "decode_tok_s": 59.7,
+   "prefill_tok_s": null
   },
   {
    "id": "maya-8060s",
@@ -59,12 +59,12 @@
    "os": "Windows 11",
    "engine": "Project Maya 1.0.30",
    "context": "Maya-S",
-   "gen_tok_s": 18.3,
-   "prompt_tok_s": 320,
    "ttft_s": null,
    "kind": "measured",
    "source": "https://github.com/mw00/project-maya",
-   "note": "A user report for Maya-S, not the archived Maya-M. Short-context generation was 18.3 tok/s; prompt read 320 tok/s."
+   "note": "A user report for Maya-S, not the archived Maya-M. Short-context generation was 18.3 tok/s; prompt read 320 tok/s.",
+   "decode_tok_s": 18.3,
+   "prefill_tok_s": 320
   },
   {
    "id": "mirai-4070",
@@ -75,17 +75,15 @@
    "os": "Linux",
    "engine": "mirai-s-ada / CUDA 12",
    "context": "4K",
-   "gen_tok_s": 70.1,
-   "prompt_tok_s": 1090,
    "ttft_s": null,
    "kind": "measured",
    "source": "https://github.com/professorpalmer/mirai-s-ada",
-   "note": "CUDA reference, not an M5 result. 60.9 tok/s at 64K, 20.3 at 128K, 10.3 at 200K; 1,090 tok/s prompt read."
+   "note": "CUDA reference, not an M5 result. 60.9 tok/s at 64K, 20.3 at 128K, 10.3 at 200K; 1,090 tok/s prompt read.",
+   "decode_tok_s": 70.1,
+   "prefill_tok_s": 1090
   },
   {
    "model_id": null,
-   "gen_tok_s": 58.2,
-   "prompt_tok_s": 1284.0,
    "ttft_s": null,
    "kind": "measured",
    "id": "strixfold-m5-firstlight",
@@ -96,12 +94,12 @@
    "engine": "StrixFold HIP / EXL3 2.9 bpw",
    "context": "first light, one chat",
    "source": "https://github.com/Shoestring-dev/StrixFold/blob/HEAD/docs/BOSGAME-M5.md",
-   "note": "Code 70.7 tok/s and prose 41.1 tok/s in the first-light test; one chat across the prompt set 58.2 tok/s; prompt read 1,284 tok/s. Stock 85 W balanced, drafting on."
+   "note": "Code 70.7 tok/s and prose 41.1 tok/s in the first-light test; one chat across the prompt set 58.2 tok/s; prompt read 1,284 tok/s. Stock 85 W balanced, drafting on.",
+   "decode_tok_s": 58.2,
+   "prefill_tok_s": 1284.0
   },
   {
    "model_id": null,
-   "gen_tok_s": 54.5,
-   "prompt_tok_s": 1128.0,
    "ttft_s": null,
    "kind": "measured",
    "id": "strixfold-m5-agent-a",
@@ -112,12 +110,12 @@
    "engine": "StrixFold HIP / EXL3 2.9 bpw",
    "context": "agent work, <20K prompt",
    "source": "https://github.com/Shoestring-dev/StrixFold/blob/HEAD/docs/RESULTS.md",
-   "note": "Median of 47 single requests; 20-150K prompts ranged 48.3-51.6 tok/s. 27.3 tok/s each with the prompt cache; stock balanced 85 W, up to four concurrent."
+   "note": "Median of 47 single requests; 20-150K prompts ranged 48.3-51.6 tok/s. 27.3 tok/s each with the prompt cache; stock balanced 85 W, up to four concurrent.",
+   "decode_tok_s": 54.5,
+   "prefill_tok_s": 1128.0
   },
   {
    "model_id": null,
-   "gen_tok_s": 49.7,
-   "prompt_tok_s": 1118.0,
    "ttft_s": null,
    "kind": "measured",
    "id": "strixfold-m5-agent-b",
@@ -128,12 +126,12 @@
    "engine": "StrixFold HIP / EXL3 2.9 bpw",
    "context": "agent work, <20K prompt",
    "source": "https://github.com/Shoestring-dev/StrixFold/blob/HEAD/docs/RESULTS.md",
-   "note": "Median of 37 single requests; 20-100K prompts ranged 39.7-52.1 tok/s; sample size is small and the USB4 links changed. 27.6 tok/s each with the prompt cache."
+   "note": "Median of 37 single requests; 20-100K prompts ranged 39.7-52.1 tok/s; sample size is small and the USB4 links changed. 27.6 tok/s each with the prompt cache.",
+   "decode_tok_s": 49.7,
+   "prefill_tok_s": 1118.0
   },
   {
    "model_id": null,
-   "gen_tok_s": 52.84,
-   "prompt_tok_s": 1413.8,
    "ttft_s": null,
    "kind": "measured",
    "id": "strixfold-halo",
@@ -144,12 +142,12 @@
    "engine": "StrixFold HIP / EXL3 2.9 bpw",
    "context": "one chat",
    "source": "https://github.com/Shoestring-dev/StrixFold/blob/HEAD/docs/RESULTS.md",
-   "note": "1,543.4 tok/s prompt read at 11,594 tokens; eight chats total 107.96 tok/s; 72.3% of 2\u00d7 DGX Spark. Quality MMLU-Pro 84.8%, HumanEval+ 92%."
+   "note": "1,543.4 tok/s prompt read at 11,594 tokens; eight chats total 107.96 tok/s; 72.3% of 2\u00d7 DGX Spark. Quality MMLU-Pro 84.8%, HumanEval+ 92%.",
+   "decode_tok_s": 52.84,
+   "prefill_tok_s": 1413.8
   },
   {
    "model_id": null,
-   "gen_tok_s": 73.7,
-   "prompt_tok_s": 1379.0,
    "ttft_s": null,
    "kind": "measured",
    "id": "strixfold-halo-48k",
@@ -160,12 +158,12 @@
    "engine": "StrixFold HIP / EXL3 2.9 bpw",
    "context": "48K prompt, coding",
    "source": "https://github.com/Shoestring-dev/StrixFold/blob/HEAD/docs/RESULTS.md",
-   "note": "Drafting on; 31.5 tok/s with drafting off. 32.7 at the task alone; 1M prompt read was 1,071 tok/s (962 s) and a cached second turn returned in 3.9 s."
+   "note": "Drafting on; 31.5 tok/s with drafting off. 32.7 at the task alone; 1M prompt read was 1,071 tok/s (962 s) and a cached second turn returned in 3.9 s.",
+   "decode_tok_s": 73.7,
+   "prefill_tok_s": 1379.0
   },
   {
    "model_id": null,
-   "gen_tok_s": 12.88,
-   "prompt_tok_s": null,
    "ttft_s": null,
    "kind": "measured",
    "id": "tensorfold-qwen38-27b",
@@ -176,12 +174,12 @@
    "engine": "TensorFold 1.0.12 HIP",
    "context": "code T0, community-v1",
    "source": "https://github.com/ashhart/TensorFold/issues/1001",
-   "note": "Stream delivery tok/s. Chat T0 13.17, code T1 12.89, chat T1 12.90; first text 0.06-0.50 s. Local checkpoint receipts; not yet publishable on the board."
+   "note": "Stream delivery tok/s. Chat T0 13.17, code T1 12.89, chat T1 12.90; first text 0.06-0.50 s. Local checkpoint receipts; not yet publishable on the board. Prefill is not reported in the receipt table.",
+   "decode_tok_s": 12.88,
+   "prefill_tok_s": null
   },
   {
    "model_id": null,
-   "gen_tok_s": 103.36,
-   "prompt_tok_s": null,
    "ttft_s": null,
    "kind": "measured",
    "id": "tensorfold-qwen36-35b",
@@ -192,12 +190,12 @@
    "engine": "TensorFold 1.0.12 HIP",
    "context": "code T0, community-v1",
    "source": "https://github.com/ashhart/TensorFold/issues/1001",
-   "note": "Stream delivery tok/s. Chat T0 79.84, code T1 80.75, chat T1 72.96; first text 0.06-0.50 s. Local checkpoint receipts."
+   "note": "Stream delivery tok/s. Chat T0 79.84, code T1 80.75, chat T1 72.96; first text 0.06-0.50 s. Local checkpoint receipts. Prefill is not reported in the receipt table.",
+   "decode_tok_s": 103.36,
+   "prefill_tok_s": null
   },
   {
    "model_id": null,
-   "gen_tok_s": 38.83,
-   "prompt_tok_s": null,
    "ttft_s": null,
    "kind": "measured",
    "id": "tensorfold-qwen35-9b",
@@ -208,7 +206,9 @@
    "engine": "TensorFold 1.0.12 HIP",
    "context": "code T0, community-v1",
    "source": "https://github.com/ashhart/TensorFold/issues/1001",
-   "note": "Stream delivery tok/s. Chat T0 38.95, code T1 38.61, chat T1 38.51; first text 0.06-0.50 s. Local checkpoint receipts."
+   "note": "Stream delivery tok/s. Chat T0 38.95, code T1 38.61, chat T1 38.51; first text 0.06-0.50 s. Local checkpoint receipts. Prefill is not reported in the receipt table.",
+   "decode_tok_s": 38.83,
+   "prefill_tok_s": null
   }
  ],
  "pending": [

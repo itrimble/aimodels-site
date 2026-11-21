@@ -73,11 +73,11 @@ def bench_table(rows, link_models=True):
             model=f"<a href='models/{b['model_id']}.html'>{E(b['model'])}</a>"
         else:
             model=E(b['model'])
-        gen=f"{b['gen_tok_s']:.1f}" if b.get('gen_tok_s') is not None else "n/a"
-        prompt=f"{b['prompt_tok_s']:.0f}" if b.get('prompt_tok_s') is not None else "n/a"
+        prefill=f"{b['prefill_tok_s']:.0f}" if b.get('prefill_tok_s') is not None else "n/a"
+        decode=f"{b['decode_tok_s']:.1f}" if b.get('decode_tok_s') is not None else "n/a"
         ttft=f"{b['ttft_s']:.2f} s" if b.get('ttft_s') is not None else "n/a"
-        body+=f"""<tr><td>{model} <span class="b measured">measured</span><div class="small mut">{E(b['machine'])} · {E(b['hardware'])} · {E(b['os'])}</div><div class="small mut">{E(b['note'])}</div></td><td data-label="Engine">{E(b['engine'])}</td><td data-label="Context">{E(b['context'])}</td><td class="num" data-label="Generation">{gen} tok/s</td><td class="num" data-label="Prompt read">{prompt} tok/s</td><td class="num" data-label="TTFT">{ttft}</td><td data-label="Source"><a href="{b['source']}">source</a></td></tr>"""
-    return f'<div class="wrap" tabindex="0" role="region" aria-label="Measured benchmarks, scrollable"><table class="bench-table"><caption class="sr-only">Measured benchmark results with hardware and source</caption><thead><tr><th scope="col">Model</th><th scope="col">Engine</th><th scope="col">Context</th><th scope="col">Generation</th><th scope="col">Prompt read</th><th scope="col">TTFT</th><th scope="col">Source</th></tr></thead><tbody>{body}</tbody></table></div>'
+        body+=f"""<tr><td>{model} <span class="b measured">measured</span><div class="small mut">{E(b['machine'])} · {E(b['hardware'])} · {E(b['os'])}</div><div class="small mut">{E(b['note'])}</div></td><td data-label="Engine">{E(b['engine'])}</td><td data-label="Context">{E(b['context'])}</td><td class="num" data-label="Prefill (tok/s)">{prefill}</td><td class="num" data-label="Decode (tok/s)">{decode}</td><td class="num" data-label="TTFT">{ttft}</td><td data-label="Source"><a href="{b['source']}">source</a></td></tr>"""
+    return f'<div class="wrap" tabindex="0" role="region" aria-label="Measured benchmarks, scrollable"><table class="bench-table"><caption class="sr-only">Measured benchmark results with hardware and source</caption><thead><tr><th scope="col">Model</th><th scope="col">Engine</th><th scope="col">Context</th><th scope="col">Prefill (tok/s)</th><th scope="col">Decode (tok/s)</th><th scope="col">TTFT</th><th scope="col">Source</th></tr></thead><tbody>{body}</tbody></table></div>'
 
 def tag(m):
     return ' <span class="tag">extra</span>' if m.get('kind') == 'extra' else ''
@@ -143,7 +143,7 @@ body = f"""<h1>Every model we keep, and where it runs.</h1>
 <div class="card"><div class="k">Last checked</div><div class="v">{last_checked}</div><div class="small mut">Mac scan {mac_scan}</div></div>
 </div>
 <p class="pipeline">{pipeline}</p>
-<p class="pipeline"><span class="b measured">measured</span> <a href="benchmarks.html">Bosgame M5 pair: 70.7 tok/s code, 58.2 one-chat (StrixFold)</a> · <a href="benchmarks.html#measured">44.0 tok/s Flash-Next on 8060S</a> · <a href="benchmarks.html#measured">18.3 tok/s GLM Maya-S</a>. Our M5s pending.</p>
+<p class="pipeline"><span class="b measured">measured</span> <a href="benchmarks.html">Bosgame M5 pair: 58.2 tok/s decode, 1,284 tok/s prefill (StrixFold)</a> · <a href="benchmarks.html#measured">44.0 tok/s Flash-Next on 8060S</a> · <a href="benchmarks.html#measured">18.3 tok/s GLM Maya-S</a>. Our M5s pending.</p>
 <div class="start"><h2>Start here</h2><p>Three decisions cover most of the archive. The table below is the evidence; the catalog has every build and filter.</p>
 <div class="picks">
 <div class="pick"><span class="k">One M5</span><a href="models/qwen3-8-flash-next-gguf-ud-iq4-xs.html">Flash-Next IQ4_XS</a> or <a href="models/qwen3-8-flash-next-abliterated-gsq-rco-strata-gguf-gsq-rco.html">Strata IQ3_S</a><div class="small mut">~103 GB or ~93 GB; the fastest large model on one box.</div></div>
@@ -342,18 +342,21 @@ page("fleet.html","Fleet & fit",body.replace("{holds_html}", holds()))
 measured = BENCH['rows']
 pending = BENCH['pending']
 pending_html = "".join(f'<div class="pick"><span class="k">{E(p["machine"])}</span>{E(p["reason"])}</div>' for p in pending)
-body=f"""<h1>Benchmarks</h1><p class="lead">Measured generation and prompt speed, with the hardware and the source. These are not our benchmarks: they are the best published measurements on M5-class hardware, plus Windows, Linux and CUDA references. Our Bosgame M5s have not arrived yet; StrixFold’s third-party pair data is below.</p>
+body=f"""<h1>Benchmarks</h1><p class="lead">Measured prefill and decode speed, with the hardware and the source. These are not our benchmarks: they are the best published measurements on M5-class hardware, plus Windows, Linux and CUDA references. Our Bosgame M5s have not arrived yet; StrixFold’s third-party pair data is below.</p>
 <div class="cards stats">
 <div class="card"><div class="k">Measured rows</div><div class="v">{len(measured)}</div><div class="small mut">published sources</div></div>
-<div class="card"><div class="k">Bosgame M5 pair</div><div class="v">58.2</div><div class="small mut">tok/s, StrixFold one-chat</div></div>
+<div class="card"><div class="k">Bosgame M5 pair</div><div class="v">58.2</div><div class="small mut">decode tok/s; 1,284 prefill</div></div>
 <div class="card"><div class="k">Our M5</div><div class="v">Pending</div><div class="small mut">delivery Monday; plan below</div></div>
 </div>
 <p class="note"><b>StrixFold</b> measured two Bosgame M5 pairs and a pair of Ryzen AI Halo boxes over USB4. <b>TensorFold</b> measured a single Strix Halo on ROCm. None of these are our boxes; our M5s arrive Monday. The site's token/s figures are theoretical ceilings; this page is the measured counterpart.</p>
 <h2 id="measured">Measured</h2>
 <p><b>StrixFold</b> is the two-box HIP fork of TensorFold; the M5 pair rows are third-party measurements on actual Bosgame M5s. <b>TensorFold</b> rows are its ROCm benchmark receipts on a single Strix Halo.</p>
-<p class="small mut">Updated {E(BENCH['generated'])}. Generation is decode tokens per second; prompt read is prefill tokens per second; TTFT is time to first token. Context matters, so the context column is part of the result.</p>
+<p class="small mut">Updated {E(BENCH['generated'])}. Prefill is prompt processing speed; decode is token generation speed; TTFT is time to first token. Context matters, so the context column is part of the result.</p>
 {bench_table(measured)}
 <p class="small mut">Method: {E(BENCH['method'])} Machine-readable: <a href="data/benchmarks.json">data/benchmarks.json</a>.</p>
+<h2 id="prefill-decode">Prefill and decode</h2>
+<p><b>Prefill</b> is how fast the model reads the prompt; it sets the time to first token and the cost of a long context. <b>Decode</b> is how fast it writes the answer; it sets sustained output. They are separate measurements, and a single “tokens per second” number without a label is ambiguous.</p>
+<p>StrixFold reports both, so its M5 rows have both columns. TensorFold’s issue #1001 reports stream-delivery decode only; its prefill cells are <b>n/a</b> because the source did not measure them. That is a missing measurement, not a zero. The same applies to the coding and 8K rows from Strata.</p>
 <h2 id="estimates">Measured vs estimated</h2>
 <p>A green <span class="b fits">Fits</span> on the fleet matrix is a memory-fit verdict, not a speed claim. The <code>≈ tok/s ceiling</code> under it is bandwidth divided by active weight bytes. A model can fit and still be unpleasant at 4 tok/s; the 27B BF16 row is the obvious example. The measured table above is what happened on real hardware.</p>
 <h2 id="pending">What is still missing</h2>
