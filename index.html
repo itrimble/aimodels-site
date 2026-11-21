@@ -7,7 +7,7 @@
 <meta name="twitter:card" content="summary"><meta name="twitter:title" content="Overview · Remnant AI Models"><meta name="twitter:description" content="Remnant Security&#x27;s local AI model archive: what we keep, what runs on which machine, and how to run it.">
 <link rel="stylesheet" href="style.css"></head><body>
 <a class="skip" href="#main">Skip to content</a>
-<header><nav class="nav" aria-label="Primary"><a class="brand" href="index.html">Remnant <span>AI Models</span></a><a class="l on" href="index.html" aria-current="page">Overview</a><a class="l" href="catalog.html">Catalog</a><a class="l" href="fleet.html">Fleet & fit</a><a class="l" href="recipes.html">Recipes</a><a class="l" href="use-cases.html">Use cases</a><a class="l" href="licenses.html">Licenses</a></nav></header>
+<header><nav class="nav" aria-label="Primary"><a class="brand" href="index.html">Remnant <span>AI Models</span></a><a class="l on" href="index.html" aria-current="page">Overview</a><a class="l" href="catalog.html">Catalog</a><a class="l" href="fleet.html">Fleet & fit</a><a class="l" href="benchmarks.html">Benchmarks</a><a class="l" href="recipes.html">Recipes</a><a class="l" href="use-cases.html">Use cases</a><a class="l" href="licenses.html">Licenses</a></nav></header>
 <main id="main" tabindex="-1"><h1>Every model we keep, and where it runs.</h1>
 <p class="lead">Remnant Security's local AI archive: 39 model builds across text, code, vision, speech, music, image, video and embeddings, about 3.8 TiB on disk. For each one: what it is, its license, how much memory it needs, and whether it runs on our machines, including the planned Bosgame M5 boxes, one or two of them.</p>
 <div class="cards stats">
@@ -16,6 +16,7 @@
 <div class="card"><div class="k">Last checked</div><div class="v">21 Nov 2026</div><div class="small mut">Mac scan 15 Nov 2026</div></div>
 </div>
 <p class="pipeline">Pipeline: 39 done · 0 downloading · 0 queued · 0 gated.</p>
+<p class="pipeline"><span class="b measured">measured</span> <a href="benchmarks.html">44.0 tok/s Flash-Next IQ3_S on 8060S</a> · <a href="benchmarks.html#measured">59.7 tok/s at 8K on Linux</a> · <a href="benchmarks.html#measured">18.3 tok/s GLM Maya-S</a>. Bosgame M5 pending.</p>
 <div class="start"><h2>Start here</h2><p>Three decisions cover most of the archive. The table below is the evidence; the catalog has every build and filter.</p>
 <div class="picks">
 <div class="pick"><span class="k">One M5</span><a href="models/qwen3-8-flash-next-gguf-ud-iq4-xs.html">Flash-Next IQ4_XS</a> or <a href="models/qwen3-8-flash-next-abliterated-gsq-rco-strata-gguf-gsq-rco.html">Strata IQ3_S</a><div class="small mut">~103 GB or ~93 GB; the fastest large model on one box.</div></div>
@@ -92,5 +93,5 @@
 <td data-label="M5 ×2"><span class="b fits">Fits</span><div class="small mut">≈30.5 tok/s ceiling</div></td>
 <td data-label="MacBook Pro"><span class="b no">No</span></td>
 <td data-label="Abliterated"><span class="b abl">yes</span></td></tr></tbody></table></div>
-<p class="small mut">Token/s figures are theoretical ceilings (bandwidth ÷ bytes of active weights per token), not measurements. Real speed is usually well below. See <a href="fleet.html#method">method</a>. Orange “Tight / offload” and purple “After 128 GB RAM” are not the same as green “Fits”.</p>
-<p class="note">Two engines matter: alesha-pro's Mirai and Maya builds need their own forked engines (mainline llama.cpp, LM Studio and Ollama will not load them), and Maya/Strata builds can't be split across two boxes with llama.cpp RPC. Mirai is CUDA-only, so it is not a practical M5 model.</p></main><footer>Remnant Security · Local model archive notes. Facts come from each model's Hugging Face card; speed and memory figures are estimates and are labelled as such. Nothing here is a benchmark.</footer></body></html>
+<p class="small mut">Token/s figures are theoretical ceilings (bandwidth ÷ bytes of active weights per token), not measurements. Real speed is usually well below. See <a href="fleet.html#method">method</a>; measured results are on the <a href="benchmarks.html">Benchmarks</a> page. Orange “Tight / offload” and purple “After 128 GB RAM” are not the same as green “Fits”.</p>
+<p class="note">Two engines matter: alesha-pro's Mirai and Maya builds need their own forked engines (mainline llama.cpp, LM Studio and Ollama will not load them), and Maya/Strata builds can't be split across two boxes with llama.cpp RPC. Mirai is CUDA-only, so it is not a practical M5 model.</p></main><footer>Remnant Security · Local model archive notes. Facts come from each model's Hugging Face card; speed and memory figures are estimates unless marked measured. Hardware, sources and measured results are on the <a href="benchmarks.html">Benchmarks</a> page.</footer></body></html>

@@ -1,0 +1,108 @@
+{
+ "generated": "2026-11-21",
+ "method": "Measured results from published sources, not our own benchmarks. gen_tok_s is token generation speed; prompt_tok_s is prompt processing; ttft_s is time to first token. Context matters: a result at 4K is not a result at 128K.",
+ "rows": [
+  {
+   "id": "strata-win-iq3s",
+   "model_id": "qwen3-8-flash-next-abliterated-gsq-rco-strata-gguf-gsq-rco",
+   "model": "Qwen3.8 Flash-Next IQ3_S (Strata)",
+   "machine": "GMKtec NucBox EVO-X2",
+   "hardware": "Ryzen AI Max+ 395, 128 GB, Radeon 8060S",
+   "os": "Windows 11 Pro",
+   "engine": "Strata 0.2.7 / ROCm 10.2",
+   "context": "short chat",
+   "gen_tok_s": 44.0,
+   "prompt_tok_s": 755,
+   "ttft_s": 0.6,
+   "kind": "measured",
+   "source": "https://github.com/Niko1221/Strata/blob/HEAD/docs/STRIX_HALO_WINDOWS.md",
+   "note": "Third-party measurement on the closest M5-class box, not a Bosgame. 4K/16K/32K prompt reads were 755/821/792 tok/s; 4K TTFT 0.60 s."
+  },
+  {
+   "id": "strata-win-code",
+   "model_id": "qwen3-8-flash-next-abliterated-gsq-rco-strata-gguf-gsq-rco",
+   "model": "Qwen3.8 Flash-Next IQ3_S (Strata)",
+   "machine": "GMKtec NucBox EVO-X2",
+   "hardware": "Ryzen AI Max+ 395, 128 GB, Radeon 8060S",
+   "os": "Windows 11 Pro",
+   "engine": "Strata 0.2.7 / ROCm 10.2",
+   "context": "coding agent, 6 turns",
+   "gen_tok_s": 47.0,
+   "prompt_tok_s": null,
+   "ttft_s": 4.5,
+   "kind": "measured",
+   "source": "https://github.com/Niko1221/Strata/blob/HEAD/docs/STRIX_HALO_WINDOWS.md",
+   "note": "69% of the prompt came from the conversation cache; 4.5 s to first token per turn."
+  },
+  {
+   "id": "strata-linux-8k",
+   "model_id": "qwen3-8-flash-next-abliterated-gsq-rco-strata-gguf-gsq-rco",
+   "model": "Qwen3.8 Flash-Next IQ3_S (Strata)",
+   "machine": "Ryzen AI Max+ 395 test box",
+   "hardware": "128 GB, Radeon 8060S, Linux",
+   "os": "Linux",
+   "engine": "Strata 0.2.x",
+   "context": "8K",
+   "gen_tok_s": 59.7,
+   "prompt_tok_s": null,
+   "ttft_s": null,
+   "kind": "measured",
+   "source": "https://github.com/Niko1221/Strata/blob/HEAD/docs/STRIX_HALO.md",
+   "note": "Tuned switches. The same page measured 56.2 tok/s at 8K with defaults and 40.6-42.8 tok/s at 128K."
+  },
+  {
+   "id": "maya-8060s",
+   "model_id": null,
+   "model": "GLM-5.3-Flash Maya-S",
+   "machine": "Radeon 8060S test box",
+   "hardware": "Ryzen AI Max+ 395, 128 GB, 96 GB for the GPU",
+   "os": "Windows 11",
+   "engine": "Project Maya 1.0.30",
+   "context": "Maya-S",
+   "gen_tok_s": 18.3,
+   "prompt_tok_s": 320,
+   "ttft_s": null,
+   "kind": "measured",
+   "source": "https://github.com/mw00/project-maya",
+   "note": "A user report for Maya-S, not the archived Maya-M. Short-context generation was 18.3 tok/s; prompt read 320 tok/s."
+  },
+  {
+   "id": "mirai-4070",
+   "model_id": "qwen3-8-27b-s-mirai-gguf-mirai",
+   "model": "Qwen3.8-27B-S Mirai",
+   "machine": "RTX 4070",
+   "hardware": "RTX 4070, 12 GB",
+   "os": "Linux",
+   "engine": "mirai-s-ada / CUDA 12",
+   "context": "4K",
+   "gen_tok_s": 70.1,
+   "prompt_tok_s": 1090,
+   "ttft_s": null,
+   "kind": "measured",
+   "source": "https://github.com/professorpalmer/mirai-s-ada",
+   "note": "CUDA reference, not an M5 result. 60.9 tok/s at 64K, 20.3 at 128K, 10.3 at 200K; 1,090 tok/s prompt read."
+  }
+ ],
+ "pending": [
+  {
+   "machine": "Bosgame M5 x1",
+   "reason": "Hardware arrives Monday. The plan is llama-bench and llama-server timings at 8K, 32K and 128K."
+  },
+  {
+   "machine": "Bosgame M5 x2, llama.cpp RPC",
+   "reason": "No two-box result exists. Measure load time, prompt read and generation separately; expect the 14-22% RPC cost."
+  },
+  {
+   "machine": "MacBook Pro M4 Max / Mac mini M4",
+   "reason": "No clean local result yet. The same test should run on Metal before the M5 arrives."
+  },
+  {
+   "machine": "Full 262K context",
+   "reason": "No measured result at the full Qwen3.8 window; the KV cache and speed both change with depth."
+  },
+  {
+   "machine": "Image, video and TTS",
+   "reason": "The page measures LLM token speed. Diffusion steps, video frames and real-time speech need their own benchmarks."
+  }
+ ]
+}

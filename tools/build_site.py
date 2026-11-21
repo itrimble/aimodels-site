@@ -2,7 +2,9 @@ import json, html, os, shutil
 from datetime import datetime
 from site_css import CSS
 from use_cases import UC
+from recipes import render_recipes
 C = json.load(open('data/catalog.json'))
+BENCH = json.load(open('data/benchmarks.json'))
 OUT = '.'
 # Never rmtree the repo root (that would delete .git, CNAME, tools, and this script).
 if os.path.abspath(OUT) == os.path.abspath('.'):
@@ -29,7 +31,7 @@ json.dump(pub, open(OUT+'/data/catalog.json','w'), indent=1)
 
 open(OUT+'/style.css','w').write(CSS)
 
-NAV = [("index.html","Overview"),("catalog.html","Catalog"),("fleet.html","Fleet & fit"),("recipes.html","Recipes"),("use-cases.html","Use cases"),("licenses.html","Licenses")]
+NAV = [("index.html","Overview"),("catalog.html","Catalog"),("fleet.html","Fleet & fit"),("benchmarks.html","Benchmarks"),("recipes.html","Recipes"),("use-cases.html","Use cases"),("licenses.html","Licenses")]
 def page(fn, title, body, depth=0):
     pre = "../"*depth
     canon = "https://aimodels.remnantsecurity.com/" if fn == "index.html" else f"https://aimodels.remnantsecurity.com/{fn}"
@@ -49,7 +51,7 @@ def page(fn, title, body, depth=0):
 <link rel="stylesheet" href="{pre}style.css"></head><body>
 <a class="skip" href="#main">Skip to content</a>
 <header><nav class="nav" aria-label="Primary"><a class="brand" href="{pre}index.html">Remnant <span>AI Models</span></a>{nav}</nav></header>
-<main id="main" tabindex="-1">{body}</main><footer>Remnant Security · Local model archive notes. Facts come from each model's Hugging Face card; speed and memory figures are estimates and are labelled as such. Nothing here is a benchmark.</footer></body></html>""")
+<main id="main" tabindex="-1">{body}</main><footer>Remnant Security · Local model archive notes. Facts come from each model's Hugging Face card; speed and memory figures are estimates unless marked measured. Hardware, sources and measured results are on the <a href="{pre}benchmarks.html">Benchmarks</a> page.</footer></body></html>""")
 
 def badge(v, cls=None): return f'<span class="b {cls or v}">{E(VLABEL.get(v,v))}</span>'
 def params(m):
@@ -63,6 +65,20 @@ def fitcell(m,i):
     return s
 
 SHORT = {"m5x1":"M5×1","m5x2":"M5×2","mbp":"MBP","mini":"mini","omarchy":"omarchy","nas":"NAS","neo":"Neo"}
+
+def bench_table(rows, link_models=True):
+    body=""
+    for b in rows:
+        if link_models and b.get('model_id'):
+            model=f"<a href='models/{b['model_id']}.html'>{E(b['model'])}</a>"
+        else:
+            model=E(b['model'])
+        gen=f"{b['gen_tok_s']:.1f}" if b.get('gen_tok_s') is not None else "n/a"
+        prompt=f"{b['prompt_tok_s']:.0f}" if b.get('prompt_tok_s') is not None else "n/a"
+        ttft=f"{b['ttft_s']:.2f} s" if b.get('ttft_s') is not None else "n/a"
+        body+=f"""<tr><td>{model} <span class="b measured">measured</span><div class="small mut">{E(b['machine'])} · {E(b['hardware'])} · {E(b['os'])}</div><div class="small mut">{E(b['note'])}</div></td><td data-label="Engine">{E(b['engine'])}</td><td data-label="Context">{E(b['context'])}</td><td class="num" data-label="Generation">{gen} tok/s</td><td class="num" data-label="Prompt read">{prompt} tok/s</td><td class="num" data-label="TTFT">{ttft}</td><td data-label="Source"><a href="{b['source']}">source</a></td></tr>"""
+    return f'<div class="wrap" tabindex="0" role="region" aria-label="Measured benchmarks, scrollable"><table class="bench-table"><caption class="sr-only">Measured benchmark results with hardware and source</caption><thead><tr><th scope="col">Model</th><th scope="col">Engine</th><th scope="col">Context</th><th scope="col">Generation</th><th scope="col">Prompt read</th><th scope="col">TTFT</th><th scope="col">Source</th></tr></thead><tbody>{body}</tbody></table></div>'
+
 def tag(m):
     return ' <span class="tag">extra</span>' if m.get('kind') == 'extra' else ''
 def fit_summary(m):
@@ -127,6 +143,7 @@ body = f"""<h1>Every model we keep, and where it runs.</h1>
 <div class="card"><div class="k">Last checked</div><div class="v">{last_checked}</div><div class="small mut">Mac scan {mac_scan}</div></div>
 </div>
 <p class="pipeline">{pipeline}</p>
+<p class="pipeline"><span class="b measured">measured</span> <a href="benchmarks.html">44.0 tok/s Flash-Next IQ3_S on 8060S</a> · <a href="benchmarks.html#measured">59.7 tok/s at 8K on Linux</a> · <a href="benchmarks.html#measured">18.3 tok/s GLM Maya-S</a>. Bosgame M5 pending.</p>
 <div class="start"><h2>Start here</h2><p>Three decisions cover most of the archive. The table below is the evidence; the catalog has every build and filter.</p>
 <div class="picks">
 <div class="pick"><span class="k">One M5</span><a href="models/qwen3-8-flash-next-gguf-ud-iq4-xs.html">Flash-Next IQ4_XS</a> or <a href="models/qwen3-8-flash-next-abliterated-gsq-rco-strata-gguf-gsq-rco.html">Strata IQ3_S</a><div class="small mut">~103 GB or ~93 GB; the fastest large model on one box.</div></div>
@@ -148,7 +165,7 @@ body = f"""<h1>Every model we keep, and where it runs.</h1>
 <div class="wrap"><table class="fit-table"><caption class="sr-only">LLM builds and their fit on one M5, two M5s, and the MacBook Pro</caption>
 <thead><tr><th scope="col">Build</th><th scope="col">Est. memory (GB)</th><th scope="col">M5 ×1</th><th scope="col">M5 ×2</th><th scope="col">MacBook Pro M4 Max</th><th scope="col">Abliterated</th></tr></thead>
 <tbody>{m5rows(['m5x1','m5x2','mbp'])}</tbody></table></div>
-<p class="small mut">Token/s figures are theoretical ceilings (bandwidth ÷ bytes of active weights per token), not measurements. Real speed is usually well below. See <a href="fleet.html#method">method</a>. Orange “Tight / offload” and purple “After 128 GB RAM” are not the same as green “Fits”.</p>
+<p class="small mut">Token/s figures are theoretical ceilings (bandwidth ÷ bytes of active weights per token), not measurements. Real speed is usually well below. See <a href="fleet.html#method">method</a>; measured results are on the <a href="benchmarks.html">Benchmarks</a> page. Orange “Tight / offload” and purple “After 128 GB RAM” are not the same as green “Fits”.</p>
 <p class="note">Two engines matter: alesha-pro's Mirai and Maya builds need their own forked engines (mainline llama.cpp, LM Studio and Ollama will not load them), and Maya/Strata builds can't be split across two boxes with llama.cpp RPC. Mirai is CUDA-only, so it is not a practical M5 model.</p>"""
 page("index.html","Overview",body)
 
@@ -268,6 +285,8 @@ RECIPE_HINT = {
 for m in MODELS:
     hint = next((v for k,v in RECIPE_HINT.items() if k.lower() in m['engine'].lower()), "recipes.html")
     fr = "".join(f"<tr><th scope='row'>{E(f['name'])}</th><td>{fitcell(m,f['id'])}</td><td class='small mut'>{E(f['budget_note'])}</td></tr>" for f in FLEET)
+    bm = [b for b in BENCH['rows'] if b.get('model_id') == m['id']]
+    bench_html = bench_table(bm, link_models=False) if bm else '<p class="note">No measured benchmark for this build yet. The token/s figures above are estimates; the <a href="../benchmarks.html">Benchmarks page</a> has measured results for the closest builds and hardware.</p>'
     body=f"""<p class="small"><a href="../catalog.html">← Catalog</a></p><h1>{E(m['family'])}</h1><p class="lead">{E(m['quant_format'])} · <a href="{m['hf_url']}">{E(m['repo'])}</a>{tag(m)}</p>
 <p>{badge(m['status'])} {'<span class="b abl">abliterated</span>' if m['abliterated'] else ''} {'<span class="b nc">non-commercial</span>' if m['non_commercial'] else ''}</p>
 <div class="wrap"><table>
@@ -282,7 +301,8 @@ for m in MODELS:
 <tr><th scope="row">Notes</th><td>{E(m['notes'])}</td></tr></table></div>
 {'<p class="note danger">Abliterated model: refusal behaviour was removed or suppressed by a third party. Use it only for lawful research on systems you own or are authorised to test, keep it off public endpoints, and you own whatever it produces. See <a href="../licenses.html#abliterated">responsibility note</a>.</p>' if m['abliterated'] else ''}
 <h2>Where it runs</h2><div class="wrap"><table><caption class="sr-only">Fit verdicts for this model on every machine</caption><thead><tr><th scope="col">Machine</th><th scope="col">Verdict</th><th scope="col">Budget used</th></tr></thead><tbody>{fr}</tbody></table></div>
-<p class="small mut">Token/s = theoretical ceiling from memory bandwidth and active weight bytes; not a benchmark. Nothing on this page is a benchmark score.</p>"""
+<p class="small mut">Token/s = theoretical ceiling from memory bandwidth and active weight bytes; not a benchmark. Nothing on this page is a benchmark score.</p>
+<h2>Benchmarks</h2>{bench_html}"""
     page(f"models/{m['id']}.html", m['family'], body, depth=1)
 
 # ---------- fleet
@@ -318,160 +338,43 @@ def holds():
     return f"<div class='wrap'><table><caption class='sr-only'>Machines and what they hold</caption><thead><tr><th scope='col'>Machine</th><th scope='col'>Holds</th><th scope='col'>What</th></tr></thead><tbody>{rows}</tbody></table></div>"
 page("fleet.html","Fleet & fit",body.replace("{holds_html}", holds()))
 
+# ---------- benchmarks
+measured = BENCH['rows']
+pending = BENCH['pending']
+pending_html = "".join(f'<div class="pick"><span class="k">{E(p["machine"])}</span>{E(p["reason"])}</div>' for p in pending)
+body=f"""<h1>Benchmarks</h1><p class="lead">Measured generation and prompt speed, with the hardware and the source. These are not our benchmarks: they are the best published measurements on M5-class hardware, plus Windows, Linux and CUDA references. No Bosgame M5 has arrived yet.</p>
+<div class="cards stats">
+<div class="card"><div class="k">Measured rows</div><div class="v">{len(measured)}</div><div class="small mut">published sources</div></div>
+<div class="card"><div class="k">Closest hardware</div><div class="v">8060S</div><div class="small mut">Ryzen AI Max+ 395, 128 GB</div></div>
+<div class="card"><div class="k">Bosgame M5</div><div class="v">Pending</div><div class="small mut">delivery Monday; plan below</div></div>
+</div>
+<p class="note">The closest measured box is a <b>GMKtec NucBox EVO-X2</b> with the same Ryzen AI Max+ 395 and Radeon 8060S. It is not a Bosgame, and it is not our measurement. The site's token/s figures are theoretical ceilings; this page is the measured counterpart.</p>
+<h2 id="measured">Measured</h2>
+<p class="small mut">Updated {E(BENCH['generated'])}. Generation is decode tokens per second; prompt read is prefill tokens per second; TTFT is time to first token. Context matters, so the context column is part of the result.</p>
+{bench_table(measured)}
+<p class="small mut">Method: {E(BENCH['method'])} Machine-readable: <a href="data/benchmarks.json">data/benchmarks.json</a>.</p>
+<h2 id="estimates">Measured vs estimated</h2>
+<p>A green <span class="b fits">Fits</span> on the fleet matrix is a memory-fit verdict, not a speed claim. The <code>≈ tok/s ceiling</code> under it is bandwidth divided by active weight bytes. A model can fit and still be unpleasant at 4 tok/s; the 27B BF16 row is the obvious example. The measured table above is what happened on real hardware.</p>
+<h2 id="pending">What is still missing</h2>
+<div class="picks">{pending_html}</div>
+<h2 id="plan">The Monday benchmark plan</h2>
+<p>Run the same commands on both boxes, at the same context, with the same build. Record the command, the model revision, the driver or ROCm version and the room temperature; a number without those is not a benchmark.</p>
+<pre><code># One M5, after the one-box set is copied
+llama-bench -m /models/official/unsloth-Qwen3.8-Flash-Next-UD-IQ4_XS/UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00001-of-00004.gguf -p 512 -n 128 -ngl 99 -r 3
+
+# Same build, longer prompt; this is where KV cache and prefill show up
+llama-bench -m /models/.../Qwen3.8-Flash-Next-UD-IQ4_XS-00001-of-00004.gguf -p 8192 -n 128 -ngl 99 -r 3
+
+# Two boxes, after rpc-server is running on box B
+rpc-server -H 192.168.12.72 -p 50052
+llama-bench -m /models/.../DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ1_M-00001-of-00006.gguf --rpc 192.168.12.72:50052 -p 512 -n 128 -ngl 99 -r 2</code></pre>
+<p class="small mut">Measure load time separately. The first token after a 16K prompt is not the same as steady-state decode, and a two-box result should report the link and the split.</p>
+<h2 id="not">What this page is not</h2>
+<ul><li>Not our benchmark: every row links to the person or project that measured it.</li><li>Not a quality score. Speed says nothing about answer quality.</li><li>Not a comparison across different prompts. The context column is part of the number.</li><li>Not final. The M5 rows replace the closest-hardware rows once the boxes are here.</li></ul>"""
+page("benchmarks.html","Benchmarks",body)
+
 # ---------- recipes
-body = """<h1>Recipes</h1><p class="lead">Copy-paste starting points. Paths are placeholders (<code>/models/...</code>); swap in your own. Check each tool's <code>--help</code> on your build, because flags change between releases.</p>
-<h2 id="m5setup">Bosgame M5: Linux memory setup</h2>
-<p>On Linux, keep the BIOS dedicated VRAM small (for example 512 MB) and let the GPU borrow system memory through GTT. A commonly used kernel setting for Strix Halo raises the TTM page limit (4 KiB pages; 27,648,000 pages ≈ 105 GiB):</p>
-<pre><code># /etc/default/grub  (then: sudo update-grub && reboot)
-GRUB_CMDLINE_LINUX_DEFAULT="quiet ttm.pages_limit=27648000 ttm.page_pool_size=27648000"
-
-# confirm after reboot
-cat /sys/module/ttm/parameters/pages_limit</code></pre>
-<p class="note">Reported practical ceiling is about 108 GB; going to ~110 GB caused errors for at least one reviewer. On Windows the GPU share is capped at 96 GB (AMD Variable Graphics Memory).</p>
-<h2 id="llamacpp">llama.cpp on the M5 (Vulkan or ROCm)</h2>
-<pre><code>git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
-# Vulkan (simplest on Strix Halo)
-cmake -B build -DGGML_VULKAN=ON -DGGML_RPC=ON -DCMAKE_BUILD_TYPE=Release
-# or ROCm/HIP (Radeon 8060S is gfx1151)
-# cmake -B build -DGGML_HIP=ON -DAMDGPU_TARGETS=gfx1151 -DGGML_RPC=ON -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release -j</code></pre>
-<h3>One box: Qwen3.8 Flash-Next IQ4_XS as an OpenAI-compatible server</h3>
-<pre><code>./build/bin/llama-server \\
-  -m /models/unsloth-Qwen3.8-Flash-Next-UD-IQ4_XS/UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00001-of-00004.gguf \\
-  --mmproj /models/unsloth-Qwen3.8-Flash-Next-UD-IQ4_XS/mmproj-BF16.gguf \\
-  -ngl 99 -c 32768 --jinja \\
-  --host 127.0.0.1 --port 8080
-# point any OpenAI client at http://127.0.0.1:8080/v1</code></pre>
-<p>Split GGUFs load from the first shard; llama.cpp finds the rest. Same pattern for GLM-5.3-Flash UD-IQ2_XXS (leave context modest: it is the tightest one-box fit).</p>
-<h3 id="rpc">Two boxes: llama.cpp RPC</h3>
-<pre><code># on box B (worker): expose its GPU over the link (USB4 or 10GbE)
-./build/bin/rpc-server -H 0.0.0.0 -p 50052
-
-# on box A (main): load the model across both
-./build/bin/llama-server \\
-  -m /models/ISTA-DASLab-DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ1_M/DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ1_M-00001-of-00006.gguf \\
-  --mmproj /models/ISTA-DASLab-DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ1_M/mmproj-DeepSeek-V4.1-Flash-1017-BF16.gguf \\
-  --rpc 10.10.10.2:50052 -ngl 99 -c 16384 --jinja --host 127.0.0.1 --port 8080</code></pre>
-<p class="note danger">rpc-server has no authentication. Only run it on a direct cable or an isolated network segment, never on a LAN you share or the internet.</p>
-<p>For the ISTA DeepSeek build, the shared Engram file must be linked as shard 6 before loading (from the ISTA card): <code>ln -s DeepSeek-V4.1-Flash-Engram-IQ4_NL.gguf DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ1_M-00006-of-00006.gguf</code>. Files fetched before Oct 27 2026 need the card's <code>convert_ds41_upstream.py</code>. Keep the Engram file on fast NVMe; it is paged, not held in memory.</p>
-<h3>Smaller machines: MoE expert offload</h3>
-<pre><code># keep attention on the GPU, push MoE expert tensors to system RAM
-./build/bin/llama-server -m model-00001-of-0000N.gguf -ngl 99 \\
-  -ot ".ffn_.*_exps.=CPU" -c 16384 --host 127.0.0.1 --port 8080</code></pre>
-<p>This is what makes Flash-Next or GLM usable on omarchy after its 128 GB RAM upgrade (8 GB RX 6600 XT + system RAM). Expect it to be slow: expert reads come over DDR4.</p>
-<h2 id="mac">MacBook Pro / Mac mini</h2>
-<pre><code>brew install llama.cpp
-# optional: let the GPU wire more unified memory (resets on reboot; leave headroom for macOS)
-sudo sysctl iogpu.wired_limit_mb=30720
-llama-server -m /models/huihui-ai-Qwen3.8-27B-Q4_K/Huihui-Qwen3.8-27B-abliterated-Q4_K.gguf \\
-  --mmproj /models/huihui-ai-Qwen3.8-27B-Q4_K/mmproj-model-bf16.gguf -ngl 99 -c 32768 --jinja --port 8080</code></pre>
-<h2 id="ollama">Ollama and LM Studio</h2>
-<pre><code># Ollama: wrap a single-file GGUF
-cat > Modelfile &lt;&lt;'EOF'
-FROM /models/unsloth-Qwen3.8-27B-UD-Q8_K_XL/Qwen3.8-27B-UD-Q8_K_XL.gguf
-PARAMETER num_ctx 32768
-EOF
-ollama create qwen38-27b-q8 -f Modelfile
-ollama run qwen38-27b-q8
-
-# split GGUFs: merge first if your Ollama version won't import shards
-llama-gguf-split --merge first-00001-of-00004.gguf merged.gguf
-
-# LM Studio CLI
-lms import /models/unsloth-Qwen3.8-27B-UD-Q8_K_XL/Qwen3.8-27B-UD-Q8_K_XL.gguf
-lms server start</code></pre>
-<p class="small mut">New architectures (Qwen3.8 Flash-Next, GLM-5.3, DeepSeek V4.1) need a recent llama.cpp; Ollama and LM Studio pick up support later. Mirai, Maya and Strata builds won't load in either.</p>
-<h2 id="forks">Builds that need their own engine</h2><ul>
-<li><b>Qwen3.8-27B Mirai S</b> (alesha-pro): use <a href="https://github.com/professorpalmer/mirai-s-ada">mirai-s-ada</a> (recommended on the card) or the <a href="https://github.com/alesha-pro/llama.cpp-mirai-s">llama.cpp-mirai-s</a> fork.</li>
-<li><b>GLM-5.3-Flash Maya-M</b> (alesha-pro): Project Maya engine plus alesha-pro's <a href="https://github.com/alesha-pro/project-maya/blob/glm-ablate/docs/GLM-ABLATE.md">GLM ablate patch</a>.</li>
-<li><b>Flash-Next GSQ-RCO Strata</b> (alesha-pro): Strata engine; the card's setup script writes the engine flags.</li></ul>
-<h2 id="convert">Original safetensors: serve or quantize</h2>
-<pre><code># quantize your own GGUF from the BF16 archive copy (example: Qwen3.8-27B)
-python llama.cpp/convert_hf_to_gguf.py /models/Qwen-Qwen3.8-27B --outtype bf16 --outfile qwen38-27b-bf16.gguf
-./build/bin/llama-quantize qwen38-27b-bf16.gguf qwen38-27b-Q5_K_M.gguf Q5_K_M</code></pre>
-<p>The Flash-Next, GLM and DeepSeek originals are 300-500 GB; they're kept as the source of truth, not for running on this fleet.</p>
-<h2 id="comfyui">ComfyUI (image, video, YuE2)</h2>
-<pre><code>git clone https://github.com/comfyanonymous/ComfyUI && cd ComfyUI
-python -m venv .venv && . .venv/bin/activate
-# AMD on Linux: install the ROCm build of PyTorch first (see pytorch.org), then:
-pip install -r requirements.txt
-python main.py --listen 127.0.0.1 --port 8188</code></pre>
-<p>YuE2 (ComfyUI repack): put <code>sheetsage2_bf16.safetensors</code> in <code>models/audio_encoders/</code> and <code>yue2_3b_bf16.safetensors</code> in <code>models/checkpoints/</code>, then load the official "YuE2: Text to Music" workflow template. MOSS-Image: install the MOSS-Image node from ComfyUI Manager. Wan 2.2 and HunyuanVideo 1.5 have ComfyUI integrations listed on their cards.</p>
-<h2 id="image">Image with Diffusers</h2>
-<pre><code>pip install "torch>=2.4.0" "transformers>=5.17" git+https://github.com/huggingface/diffusers accelerate pillow</code></pre>
-<pre><code>import torch
-from diffusers import QwenImage21Pipeline
-pipe = QwenImage21Pipeline.from_pretrained("/models/Qwen-Qwen-Image-2.1", torch_dtype=torch.bfloat16)
-pipe.enable_model_cpu_offload()   # memory optimisation from the model card
-img = pipe(prompt="isometric illustration of a home lab rack, clean flat style").images[0]
-img.save("out.png")</code></pre>
-<p class="note danger">Qwen-Image 2.1 is under the Qwen Research License: non-commercial use only.</p>
-<h2 id="video">Video: Wan 2.2 A14B and HunyuanVideo 1.5</h2>
-<pre><code>git clone https://github.com/Wan-Video/Wan2.2.git && cd Wan2.2
-pip install -r requirements.txt
-# single-device command from the model card, with offload
-python generate.py --task t2v-A14B --size 1280*720 --ckpt_dir /models/Wan-AI-Wan2.2-T2V-A14B \\
-  --offload_model True --convert_model_dtype --prompt "slow dolly shot across a dark server room, red status LEDs"</code></pre>
-<p>Image-to-video uses <code>--task i2v-A14B</code> with the I2V checkpoint and an input image (see the card). HunyuanVideo 1.5: clone <a href="https://github.com/Tencent-Hunyuan/HunyuanVideo-1.5">Tencent-Hunyuan/HunyuanVideo-1.5</a>, <code>pip install -r requirements.txt</code>, and follow its README or ComfyUI guide. Its license excludes the EU, UK and South Korea.</p>
-<h2 id="voice">Speech: Whisper, Qwen3-TTS, Fish S2 Pro</h2>
-<pre><code># Whisper large-v3-turbo via Transformers (card's route)
-pip install --upgrade transformers "datasets[audio]" accelerate
-python - &lt;&lt;'EOF'
-import torch
-from transformers import pipeline
-asr = pipeline("automatic-speech-recognition", model="/models/openai-whisper-large-v3-turbo",
-               torch_dtype=torch.float16, device_map="auto")
-print(asr("meeting.wav", return_timestamps=True)["text"])
-EOF
-
-# or whisper.cpp (Metal on Mac, Vulkan on the M5), using its own ggml file
-git clone https://github.com/ggml-org/whisper.cpp && cd whisper.cpp
-sh ./models/download-ggml-model.sh large-v3-turbo
-cmake -B build && cmake --build build -j --config Release
-./build/bin/whisper-cli -m models/ggml-large-v3-turbo.bin -f meeting.wav</code></pre>
-<pre><code># Qwen3-TTS voice clone (Base model needs a short reference clip + its transcript)
-pip install -U qwen-tts
-python - &lt;&lt;'EOF'
-import torch, soundfile as sf
-from qwen_tts import Qwen3TTSModel
-model = Qwen3TTSModel.from_pretrained("/models/Qwen-Qwen3-TTS-12Hz-1.7B-Base",
-                                      device_map="cuda:0", dtype=torch.bfloat16)
-wavs, sr = model.generate_voice_clone(text="Your weekly security digest is ready.",
-    language="English", ref_audio="my_voice.wav", ref_text="Transcript of my_voice.wav")
-sf.write("out.wav", wavs[0], sr)
-EOF</code></pre>
-<p class="small mut">On Apple silicon use <code>device_map="mps"</code>; on the M5 with ROCm PyTorch, AMD GPUs still appear as <code>cuda</code>. Only clone voices you have permission to use. Fish Audio S2 Pro runs with <a href="https://github.com/fishaudio/fish-speech">fish-speech</a>; it is research/non-commercial unless you buy a license.</p>
-<h2 id="music">Music: ACE-Step 1.5 and YuE2</h2>
-<p>ACE-Step 1.5 runs from <a href="https://github.com/ace-step/ACE-Step-1.5">ace-step/ACE-Step-1.5</a>; its card says it runs locally in under 4 GB of VRAM, so even the Mac mini can host it. YuE2 runs inside ComfyUI (above) and is CC BY-NC 4.0, so no commercial use.</p>
-<h2 id="openwebui">Front end: Open WebUI on any llama-server</h2>
-<pre><code>docker run -d --name open-webui -p 127.0.0.1:3000:8080 \\
-  -e OPENAI_API_BASE_URL=http://host.docker.internal:8080/v1 -e OPENAI_API_KEY=none \\
-  --add-host=host.docker.internal:host-gateway \\
-  -v open-webui:/app/backend/data ghcr.io/open-webui/open-webui:main</code></pre>"""
-extras_recipe = """<h2 id="extras">Extras: embeddings, TTS, image and a coding sidecar</h2>
-<p>The nine extras live under <code>/models/extras/</code> on the M5. They are small sidecars, not replacements for the main LLMs.</p>
-<h3 id="embeddings">EmbeddingGemma 2 / bge-small</h3>
-<pre><code>pip install -U sentence-transformers
-python - &lt;&lt;'EOF'
-from sentence_transformers import SentenceTransformer
-m = SentenceTransformer("/models/extras/embeddinggemma-2")
-print(m.encode(["local models stay local"]).shape)
-EOF</code></pre>
-<p><code>bge-small-en-v1.5-f16.gguf</code> is the tiny llama.cpp embedding alternative: <code>llama-server -m /models/extras/bge-small-en-v1.5-gguf/bge-small-en-v1.5-f16.gguf --embedding --port 8082</code>.</p>
-<h3 id="extras-tts">Kokoro 82M / NeuTTS Air</h3>
-<p>Kokoro is the fast TTS model; use the <code>Kokoro-TTS-Local</code> project against <code>/models/extras/kokoro-82m</code>. NeuTTS Air is a single 0.5 GB GGUF fallback.</p>
-<h3 id="extras-image">Z-Image Turbo / FLUX.1 schnell</h3>
-<pre><code>import torch
-from diffusers import AutoPipelineForText2Image
-pipe = AutoPipelineForText2Image.from_pretrained("/models/extras/z-image-turbo", torch_dtype=torch.bfloat16)
-pipe.enable_model_cpu_offload()
-img = pipe("isometric illustration of a home lab rack").images[0]</code></pre>
-<p>FLUX.1 schnell uses <code>FluxPipeline.from_pretrained("/models/extras/flux1-schnell")</code> and four steps. SeedVR2 is a ComfyUI upscaler; the Qwen-Image Q4_K_M GGUF is a ComfyUI-GGUF asset.</p>
-<h3 id="extras-code">Mellum2.1 12B-A2.5B</h3>
-<pre><code>llama-server -m /models/extras/mellum21-12b-a2.5b-thinking-q4km/Mellum2.1-12B-A2.5B-Thinking-Q4_K_M.gguf \
-  -ngl 99 -c 32768 --jinja --port 8081</code></pre>
-<p class="small mut">The extras are staged files, not benchmarks. Check each tool's <code>--help</code>; Z-Image and FLUX need a recent Diffusers or ComfyUI, SeedVR2 needs its ComfyUI node, and the GGUF extras use the same llama.cpp build as the main models.</p>"""
-body += extras_recipe
+body = render_recipes()
 page("recipes.html","Recipes",body)
 
 # ---------- use cases

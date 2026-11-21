@@ -7,7 +7,7 @@
 <meta name="twitter:card" content="summary"><meta name="twitter:title" content="Catalog · Remnant AI Models"><meta name="twitter:description" content="Remnant Security&#x27;s local AI model archive: what we keep, what runs on which machine, and how to run it.">
 <link rel="stylesheet" href="style.css"></head><body>
 <a class="skip" href="#main">Skip to content</a>
-<header><nav class="nav" aria-label="Primary"><a class="brand" href="index.html">Remnant <span>AI Models</span></a><a class="l" href="index.html">Overview</a><a class="l on" href="catalog.html" aria-current="page">Catalog</a><a class="l" href="fleet.html">Fleet & fit</a><a class="l" href="recipes.html">Recipes</a><a class="l" href="use-cases.html">Use cases</a><a class="l" href="licenses.html">Licenses</a></nav></header>
+<header><nav class="nav" aria-label="Primary"><a class="brand" href="index.html">Remnant <span>AI Models</span></a><a class="l" href="index.html">Overview</a><a class="l on" href="catalog.html" aria-current="page">Catalog</a><a class="l" href="fleet.html">Fleet & fit</a><a class="l" href="benchmarks.html">Benchmarks</a><a class="l" href="recipes.html">Recipes</a><a class="l" href="use-cases.html">Use cases</a><a class="l" href="licenses.html">Licenses</a></nav></header>
 <main id="main" tabindex="-1"><h1>Full catalog</h1><p class="lead">All 39 builds. Every listed build is on the NAS. Filter by modality, license, abliteration, or which machine it fits.</p>
 <h2>Archive builds</h2>
 <div class="filters" role="search" aria-label="Filter the archive builds">
@@ -495,4 +495,4 @@ $('cols').addEventListener('click',()=>{const on=document.body.classList.toggle(
 $('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);$('copy').textContent='Copied';setTimeout(()=>$('copy').textContent='Copy link',1400);}catch(e){$('copy').textContent='Copy failed';}});
 if(location.hash==='#on-device'){const d=$('on-device');if(d)d.open=true;}
 apply(false);
-</script></main><footer>Remnant Security · Local model archive notes. Facts come from each model's Hugging Face card; speed and memory figures are estimates and are labelled as such. Nothing here is a benchmark.</footer></body></html>
+</script></main><footer>Remnant Security · Local model archive notes. Facts come from each model's Hugging Face card; speed and memory figures are estimates unless marked measured. Hardware, sources and measured results are on the <a href="benchmarks.html">Benchmarks</a> page.</footer></body></html>
