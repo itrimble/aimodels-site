@@ -9,6 +9,8 @@ BENCH = json.load(open('data/benchmarks.json'))
 OURS = next((r for r in BENCH['rows'] if r.get('id') == 'strix1-flash-next-iq4xs-512'), None)
 OURS_DECODE = f"{OURS['decode_tok_s']:.1f}" if OURS else "Pending"
 OURS_PREFILL = f"{OURS['prefill_tok_s']:,.0f}" if OURS else ""
+OURS_VK = next((r for r in BENCH['rows'] if r.get('id') == 'strix1-flash-next-iq4xs-vulkan-512'), None)
+OURS_VK_DECODE = f"{OURS_VK['decode_tok_s']:.1f}" if OURS_VK else ""
 OUT = '.'
 # Never rmtree the repo root (that would delete .git, CNAME, tools, and this script).
 if os.path.abspath(OUT) == os.path.abspath('.'):
@@ -147,7 +149,7 @@ body = f"""<h1>Every model we keep, and where it runs.</h1>
 <div class="card"><div class="k">Last checked</div><div class="v">{last_checked}</div><div class="small mut">Mac scan {mac_scan}</div></div>
 </div>
 <p class="pipeline">{pipeline}</p>
-<p class="pipeline"><span class="b measured">measured</span> <a href="benchmarks.html#measured">Our M5: {OURS_DECODE} tok/s Flash-Next decode, {OURS_PREFILL} prefill</a> · <a href="benchmarks.html">Bosgame M5 pair: 58.2 tok/s decode, 1,284 tok/s prefill (StrixFold)</a> · <a href="benchmarks.html#measured">44.0 tok/s Flash-Next on 8060S</a> · <a href="benchmarks.html#measured">18.3 tok/s GLM Maya-S</a>. Second M5 pending.</p>
+<p class="pipeline"><span class="b measured">measured</span> <a href="benchmarks.html#measured">Our M5: {OURS_DECODE} tok/s Flash-Next decode on ROCm ({OURS_VK_DECODE} on Vulkan), {OURS_PREFILL} prefill</a> · <a href="benchmarks.html">Bosgame M5 pair: 58.2 tok/s decode, 1,284 tok/s prefill (StrixFold)</a> · <a href="benchmarks.html#measured">44.0 tok/s Flash-Next on 8060S</a> · <a href="benchmarks.html#measured">18.3 tok/s GLM Maya-S</a>. Second M5 pending.</p>
 <div class="start"><h2>Start here</h2><p>Three decisions cover most of the archive. The table below is the evidence; the catalog has every build and filter.</p>
 <div class="picks">
 <div class="pick"><span class="k">One M5</span><a href="models/qwen3-8-flash-next-gguf-ud-iq4-xs.html">Flash-Next IQ4_XS</a> or <a href="models/qwen3-8-flash-next-abliterated-gsq-rco-strata-gguf-gsq-rco.html">Strata IQ3_S</a><div class="small mut">~103 GB or ~93 GB; the fastest large model on one box.</div></div>
@@ -346,11 +348,11 @@ page("fleet.html","Fleet & fit",body.replace("{holds_html}", holds()))
 measured = BENCH['rows']
 pending = BENCH['pending']
 pending_html = "".join(f'<div class="pick"><span class="k">{E(p["machine"])}</span>{E(p["reason"])}</div>' for p in pending)
-body=f"""<h1>Benchmarks</h1><p class="lead">Measured prefill and decode speed, with the hardware and the source. The first rows are ours: our own Bosgame M5 (strix1), measured on 23 Nov 2026, with the raw run linked as the source. The rest are the best published measurements on M5-class hardware, plus Windows, Linux and CUDA references.</p>
+body=f"""<h1>Benchmarks</h1><p class="lead">Measured prefill and decode speed, with the hardware and the source. The first rows are ours: our own Bosgame M5 (strix1), measured on 23-24 Nov 2026 with llama.cpp on both ROCm and Vulkan (median of 3, decode also at 8K depth), with the raw run linked as the source. The rest are the best published measurements on M5-class hardware, plus Windows, Linux and CUDA references.</p>
 <div class="cards stats">
 <div class="card"><div class="k">Measured rows</div><div class="v">{len(measured)}</div><div class="small mut">ours plus published sources</div></div>
 <div class="card"><div class="k">Bosgame M5 pair</div><div class="v">58.2</div><div class="small mut">decode tok/s; 1,284 prefill</div></div>
-<div class="card"><div class="k">Our M5 (strix1)</div><div class="v">{OURS_DECODE}</div><div class="small mut">decode tok/s, Flash-Next IQ4_XS; {OURS_PREFILL} prefill</div></div>
+<div class="card"><div class="k">Our M5 (strix1)</div><div class="v">{OURS_DECODE}</div><div class="small mut">decode tok/s, Flash-Next IQ4_XS on ROCm; {OURS_VK_DECODE} on Vulkan; {OURS_PREFILL} prefill</div></div>
 </div>
 <p class="note"><b>StrixFold</b> measured two Bosgame M5 pairs and a pair of Ryzen AI Halo boxes over USB4. <b>TensorFold</b> measured a single Strix Halo on ROCm. Neither is our hardware; our first M5 is measured in the rows marked ours. The site's token/s figures are theoretical ceilings; this page is the measured counterpart.</p>
 <h2 id="measured">Measured</h2>
