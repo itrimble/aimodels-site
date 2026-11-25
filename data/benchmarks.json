@@ -1,7 +1,75 @@
 {
- "generated": "2026-11-23",
- "method": "Rows marked 'ours' are our own runs on our Bosgame M5 (strix1), with the raw llama-bench output published as the source. All other rows are measured results from published sources, not our own benchmarks. decode_tok_s is token generation speed; prefill_tok_s is prompt processing; ttft_s is time to first token. Context matters: a result at 4K is not a result at 128K. A missing prefill cell means the source did not report it, not that it is zero.",
+ "generated": "2026-11-24",
+ "method": "Rows marked 'ours' are our own runs on Bosgame M5 systems, with the llama-bench run receipt linked as the source. All other rows are measured results from published sources, not our own benchmarks. decode_tok_s is token generation speed; prefill_tok_s is prompt processing; ttft_s is time to first token. Context matters: a result at 4K is not a result at 128K. A missing prefill cell means the source did not report it, not that it is zero.",
  "rows": [
+  {
+   "machine": "Our Bosgame M5 (strix2)",
+   "hardware": "Ryzen AI Max+ 395, 128 GB, Radeon 8060S; 120 GiB GPU limit",
+   "os": "Omarchy 4.5.0-3 (Arch), kernel 7.2.15-4-omarchy, ROCm 7.2.4, Mesa RADV 1:26.2.5-1",
+   "engine": "llama.cpp b12670 (HIP, gfx1151)",
+   "ttft_s": null,
+   "kind": "measured",
+   "ours": true,
+   "model": "GLM-5.3 Flash UD-IQ2_XXS",
+   "id": "strix2-unsloth-glm-5-3-flash-ud-iq2-xxs-512",
+   "prefill_tok_s": 190.54,
+   "decode_tok_s": 16.14,
+   "context": "512-token prompt; decode from empty context",
+   "note": "Our run, 2026-11-24: llama-bench -ngl 99 -r 3, median. Socket power 55 W median (driver-reported). Room temperature not recorded.",
+   "model_id": "glm-5-3-flash-gguf-ud-iq2-xxs",
+   "source": "https://aimodels.remnantsecurity.com/data/runs/strix2-2026-11-24.md"
+  },
+  {
+   "machine": "Our Bosgame M5 (strix2)",
+   "hardware": "Ryzen AI Max+ 395, 128 GB, Radeon 8060S; 120 GiB GPU limit",
+   "os": "Omarchy 4.5.0-3 (Arch), kernel 7.2.15-4-omarchy, ROCm 7.2.4, Mesa RADV 1:26.2.5-1",
+   "engine": "llama.cpp b12670 (HIP, gfx1151)",
+   "ttft_s": null,
+   "kind": "measured",
+   "ours": true,
+   "model": "GLM-5.3 Flash UD-IQ2_XXS",
+   "id": "strix2-unsloth-glm-5-3-flash-ud-iq2-xxs-8192",
+   "prefill_tok_s": 167.93,
+   "decode_tok_s": 15.19,
+   "context": "8192-token prompt; decode at 8K depth",
+   "note": "Our run, 2026-11-24: llama-bench -ngl 99 -r 3, median. Socket power 55 W median (driver-reported). Room temperature not recorded.",
+   "model_id": "glm-5-3-flash-gguf-ud-iq2-xxs",
+   "source": "https://aimodels.remnantsecurity.com/data/runs/strix2-2026-11-24.md"
+  },
+  {
+   "machine": "Our Bosgame M5 (strix2)",
+   "hardware": "Ryzen AI Max+ 395, 128 GB, Radeon 8060S; 120 GiB GPU limit",
+   "os": "Omarchy 4.5.0-3 (Arch), kernel 7.2.15-4-omarchy, ROCm 7.2.4, Mesa RADV 1:26.2.5-1",
+   "engine": "llama.cpp b12670 (HIP, gfx1151)",
+   "ttft_s": null,
+   "kind": "measured",
+   "ours": true,
+   "model": "Qwen3.8 Flash-Next UD-IQ4_XS",
+   "id": "strix2-unsloth-qwen3-8-flash-next-ud-iq4-xs-512",
+   "prefill_tok_s": 588.46,
+   "decode_tok_s": 25.66,
+   "context": "512-token prompt; decode from empty context",
+   "note": "Our run, 2026-11-24: llama-bench -ngl 99 -r 3, median. Socket power 55 W median (driver-reported). Room temperature not recorded.",
+   "model_id": "qwen3-8-flash-next-gguf-ud-iq4-xs",
+   "source": "https://aimodels.remnantsecurity.com/data/runs/strix2-2026-11-24.md"
+  },
+  {
+   "machine": "Our Bosgame M5 (strix2)",
+   "hardware": "Ryzen AI Max+ 395, 128 GB, Radeon 8060S; 120 GiB GPU limit",
+   "os": "Omarchy 4.5.0-3 (Arch), kernel 7.2.15-4-omarchy, ROCm 7.2.4, Mesa RADV 1:26.2.5-1",
+   "engine": "llama.cpp b12670 (HIP, gfx1151)",
+   "ttft_s": null,
+   "kind": "measured",
+   "ours": true,
+   "model": "Qwen3.8 Flash-Next UD-IQ4_XS",
+   "id": "strix2-unsloth-qwen3-8-flash-next-ud-iq4-xs-8192",
+   "prefill_tok_s": 497.36,
+   "decode_tok_s": 23.71,
+   "context": "8192-token prompt; decode at 8K depth",
+   "note": "Our run, 2026-11-24: llama-bench -ngl 99 -r 3, median. Socket power 55 W median (driver-reported). Room temperature not recorded.",
+   "model_id": "qwen3-8-flash-next-gguf-ud-iq4-xs",
+   "source": "https://aimodels.remnantsecurity.com/data/runs/strix2-2026-11-24.md"
+  },
   {
    "id": "strix1-huihui-qwen27b-q4k-512",
    "model_id": "huihui-qwen3-8-27b-abliterated-gguf-q4-k",
@@ -758,7 +826,7 @@
  "pending": [
   {
    "machine": "Our Bosgame M5 x2, RPC",
-   "reason": "One M5 is measured (strix1, above). The second box is not set up yet, so pair, RPC split and load time are still StrixFold's third-party numbers."
+   "reason": "Single-machine baselines are available for strix1 and strix2. Two-machine RPC throughput and load time are still pending."
   },
   {
    "machine": "MacBook Pro M4 Max / Mac mini M4",
