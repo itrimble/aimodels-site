@@ -348,15 +348,15 @@ page("fleet.html","Fleet & fit",body.replace("{holds_html}", holds()))
 measured = BENCH['rows']
 pending = BENCH['pending']
 pending_html = "".join(f'<div class="pick"><span class="k">{E(p["machine"])}</span>{E(p["reason"])}</div>' for p in pending)
-body=f"""<h1>Benchmarks</h1><p class="lead">Measured prefill and decode speed, with the hardware and the source. The first rows are ours: our Bosgame M5 runs on strix1 and strix2. Each row records the backend and context and links to the run receipt (median of three). The rest are the best published measurements on M5-class hardware, plus Windows, Linux and CUDA references.</p>
+body=f"""<h1>Benchmarks</h1><p class="lead">Measured prefill and decode speed, with the hardware and the source. The first rows are ours: our Bosgame M5 runs on strix1, strix2 and the two machines linked over Thunderbolt. Each row records the backend and context and links to the run receipt (median of three). The rest are the best published measurements on M5-class hardware, plus Windows, Linux and CUDA references.</p>
 <div class="cards stats">
 <div class="card"><div class="k">Measured rows</div><div class="v">{len(measured)}</div><div class="small mut">ours plus published sources</div></div>
-<div class="card"><div class="k">Bosgame M5 pair</div><div class="v">58.2</div><div class="small mut">decode tok/s; 1,284 prefill</div></div>
+<div class="card"><div class="k">StrixFold M5 pair</div><div class="v">58.2</div><div class="small mut">decode tok/s; 1,284 prefill</div></div>
 <div class="card"><div class="k">Our M5 (strix1)</div><div class="v">{OURS_DECODE}</div><div class="small mut">decode tok/s, Flash-Next IQ4_XS on ROCm; {OURS_VK_DECODE} on Vulkan; {OURS_PREFILL} prefill</div></div>
 </div>
 <p class="note"><b>StrixFold</b> measured two Bosgame M5 pairs and a pair of Ryzen AI Halo boxes over USB4. <b>TensorFold</b> measured a single Strix Halo on ROCm. Neither is our hardware; our M5 measurements are in the rows marked ours. The site's token/s figures are theoretical ceilings; this page is the measured counterpart.</p>
 <h2 id="measured">Measured</h2>
-<p><b>StrixFold</b> is the two-box HIP fork of TensorFold; the M5 pair rows are third-party measurements on actual Bosgame M5s. <b>TensorFold</b> rows are its ROCm benchmark receipts on a single Strix Halo.</p>
+<p><b>StrixFold</b> is the two-box HIP fork of TensorFold; its rows are third-party measurements on Bosgame M5s. Our pair results use llama.cpp RPC over Thunderbolt. <b>TensorFold</b> rows are its ROCm benchmark receipts on a single Strix Halo.</p>
 <p class="small mut">Updated {E(BENCH['generated'])}. Prefill is prompt processing speed; decode is token generation speed; TTFT is time to first token. Context matters, so the context column is part of the result.</p>
 {bench_table(measured)}
 <p class="small mut">Method: {E(BENCH['method'])} Machine-readable: <a href="data/benchmarks.json">data/benchmarks.json</a>.</p>

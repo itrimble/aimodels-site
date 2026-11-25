@@ -1,7 +1,75 @@
 {
- "generated": "2026-11-24",
+ "generated": "2026-11-25",
  "method": "Rows marked 'ours' are our own runs on Bosgame M5 systems, with the llama-bench run receipt linked as the source. All other rows are measured results from published sources, not our own benchmarks. decode_tok_s is token generation speed; prefill_tok_s is prompt processing; ttft_s is time to first token. Context matters: a result at 4K is not a result at 128K. A missing prefill cell means the source did not report it, not that it is zero.",
  "rows": [
+  {
+   "id": "strix1-strix2-thunderbolt-qwen-512",
+   "model_id": "qwen3-8-flash-next-gguf-ud-iq4-xs",
+   "model": "Qwen3.8 Flash-Next UD-IQ4_XS",
+   "context": "512-token prompt; decode from empty context",
+   "prefill_tok_s": 581.7,
+   "decode_tok_s": 23.69,
+   "note": "Equal requested layer split over Thunderbolt; median of three. The receipt records individual repeats, weight hashes, command and sampled telemetry.",
+   "machine": "Our Bosgame M5 pair (strix1 + strix2)",
+   "hardware": "Two Bosgame M5s, Ryzen AI Max+ 395 and Radeon 8060S per host; 120 GiB GPU limit per host",
+   "os": "Omarchy 4.5.0-3 (Arch), kernel 7.2.15-4-omarchy, ROCm 7.2.4",
+   "engine": "llama.cpp b12670 (HIP + RPC over Thunderbolt)",
+   "ttft_s": null,
+   "kind": "measured",
+   "ours": true,
+   "source": "https://aimodels.remnantsecurity.com/data/runs/strix1-strix2-thunderbolt-2026-11-25.md"
+  },
+  {
+   "id": "strix1-strix2-thunderbolt-qwen-8192",
+   "model_id": "qwen3-8-flash-next-gguf-ud-iq4-xs",
+   "model": "Qwen3.8 Flash-Next UD-IQ4_XS",
+   "context": "8192-token prompt; decode at 8K depth",
+   "prefill_tok_s": 904.93,
+   "decode_tok_s": 22.78,
+   "note": "Equal requested layer split over Thunderbolt; median of three. The receipt records individual repeats, weight hashes, command and sampled telemetry.",
+   "machine": "Our Bosgame M5 pair (strix1 + strix2)",
+   "hardware": "Two Bosgame M5s, Ryzen AI Max+ 395 and Radeon 8060S per host; 120 GiB GPU limit per host",
+   "os": "Omarchy 4.5.0-3 (Arch), kernel 7.2.15-4-omarchy, ROCm 7.2.4",
+   "engine": "llama.cpp b12670 (HIP + RPC over Thunderbolt)",
+   "ttft_s": null,
+   "kind": "measured",
+   "ours": true,
+   "source": "https://aimodels.remnantsecurity.com/data/runs/strix1-strix2-thunderbolt-2026-11-25.md"
+  },
+  {
+   "id": "strix1-strix2-thunderbolt-glm-512",
+   "model_id": "glm-5-3-flash-gguf-ud-iq2-xxs",
+   "model": "GLM-5.3 Flash UD-IQ2_XXS",
+   "context": "512-token prompt; decode from empty context",
+   "prefill_tok_s": 234.85,
+   "decode_tok_s": 15.73,
+   "note": "Equal requested layer split over Thunderbolt; median of three. The receipt records individual repeats, weight hashes, command and sampled telemetry.",
+   "machine": "Our Bosgame M5 pair (strix1 + strix2)",
+   "hardware": "Two Bosgame M5s, Ryzen AI Max+ 395 and Radeon 8060S per host; 120 GiB GPU limit per host",
+   "os": "Omarchy 4.5.0-3 (Arch), kernel 7.2.15-4-omarchy, ROCm 7.2.4",
+   "engine": "llama.cpp b12670 (HIP + RPC over Thunderbolt)",
+   "ttft_s": null,
+   "kind": "measured",
+   "ours": true,
+   "source": "https://aimodels.remnantsecurity.com/data/runs/strix1-strix2-thunderbolt-2026-11-25.md"
+  },
+  {
+   "id": "strix1-strix2-thunderbolt-glm-8192",
+   "model_id": "glm-5-3-flash-gguf-ud-iq2-xxs",
+   "model": "GLM-5.3 Flash UD-IQ2_XXS",
+   "context": "8192-token prompt; decode at 8K depth",
+   "prefill_tok_s": 333.35,
+   "decode_tok_s": 14.71,
+   "note": "Equal requested layer split over Thunderbolt; median of three. The receipt records individual repeats, weight hashes, command and sampled telemetry.",
+   "machine": "Our Bosgame M5 pair (strix1 + strix2)",
+   "hardware": "Two Bosgame M5s, Ryzen AI Max+ 395 and Radeon 8060S per host; 120 GiB GPU limit per host",
+   "os": "Omarchy 4.5.0-3 (Arch), kernel 7.2.15-4-omarchy, ROCm 7.2.4",
+   "engine": "llama.cpp b12670 (HIP + RPC over Thunderbolt)",
+   "ttft_s": null,
+   "kind": "measured",
+   "ours": true,
+   "source": "https://aimodels.remnantsecurity.com/data/runs/strix1-strix2-thunderbolt-2026-11-25.md"
+  },
   {
    "machine": "Our Bosgame M5 (strix2)",
    "hardware": "Ryzen AI Max+ 395, 128 GB, Radeon 8060S; 120 GiB GPU limit",
@@ -826,7 +894,7 @@
  "pending": [
   {
    "machine": "Our Bosgame M5 x2, RPC",
-   "reason": "Single-machine baselines are available for strix1 and strix2. Two-machine RPC throughput and load time are still pending."
+   "reason": "Thunderbolt RPC measurements are available above. Models larger than one M5 can hold and isolated load times remain unmeasured."
   },
   {
    "machine": "MacBook Pro M4 Max / Mac mini M4",
